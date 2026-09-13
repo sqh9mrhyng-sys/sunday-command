@@ -492,7 +492,7 @@ async function loadESPN(L, week){
   if(!L.leagueId) throw new Error("Add your ESPN league ID in setup.");
   const season = S.nfl.season || new Date().getFullYear();
   const url = "https://lm-api-reads.fantasy.espn.com/apis/v3/games/ffl/seasons/"+season+
-    "/segments/0/leagues/"+L.leagueId+"?view=mMatchupScore&view=mRoster&view=mTeam&scoringPeriodId="+week;
+    "/segments/0/leagues/"+L.leagueId+"?view=mBoxscore&view=mMatchupScore&view=mRoster&view=mTeam&scoringPeriodId="+week;
   let j;
   try{ j = await jget(url, CFG.proxy); }
   catch(e){ throw new Error("ESPN blocked the request. Make the league public, add a proxy in setup, or switch this league to paste mode."); }
