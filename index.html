@@ -161,6 +161,8 @@ label{display:block;font-size:10px;color:var(--chalk-dim);margin:6px 0 3px}
 .lgcard .del{padding:5px 9px;font-size:10px;color:var(--chalk-dim)}
 .lgcard .del:hover{color:var(--redzone);border-color:var(--redzone)}
 .hint{font-size:10px;color:var(--chalk-dim);margin-top:4px}
+.hint code{color:var(--chalk);background:#0A0F0C;border:1px solid var(--line);border-radius:2px;padding:1px 4px;display:inline-block;margin:3px 0;font-size:9.5px;line-height:1.5}
+.lgcard .top select{width:auto;min-width:120px}
 .addlg{border:1px dashed var(--line);width:100%;padding:9px;border-radius:4px;color:var(--chalk-dim);font-size:11px}
 .addlg:hover{border-color:var(--bulb);color:var(--bulb)}
 
@@ -283,7 +285,7 @@ label{display:block;font-size:10px;color:var(--chalk-dim);margin:6px 0 3px}
 <div class="veil" id="veil" hidden>
   <div class="panel">
     <h2>Leagues &amp; setup</h2>
-    <p class="sub">Sleeper and public ESPN leagues pull themselves. Yahoo and Real Sports have no open API, so those run on a paste-in line you update when you feel like it — the math, the field and the alerts all work the same either way.</p>
+    <p class="sub">ESPN pulls itself while the league is public. CBS and Yahoo are both locked behind logins with no open API, so those run off your own scraper feed or a pasted score line. The need math, the field and the tickets work the same on all three.</p>
     <div id="lgList"></div>
     <button class="addlg" id="addLg">+ Add a league</button>
     <div class="grid2" style="margin-top:14px">
@@ -345,13 +347,23 @@ const store = {
 const DEFAULT_CFG = {
   week:"", proxy:"", pinned:[], parlays:[],
   leagues:[
-    {id:"L1", name:"Sleeper", platform:"sleeper", leagueId:"", user:"", manual:""},
-    {id:"L2", name:"ESPN",    platform:"espn",    leagueId:"", teamId:"", manual:""},
-    {id:"L3", name:"Yahoo",   platform:"manual",  leagueId:"", user:"", manual:""}
+    {id:"L1", name:"CBS",   platform:"cbs",   source:"paste", leagueId:"", teamId:"", feed:"", manual:""},
+    {id:"L2", name:"ESPN",  platform:"espn",  source:"auto",  leagueId:"", teamId:"", feed:"", manual:""},
+    {id:"L3", name:"Yahoo", platform:"yahoo", source:"paste", leagueId:"", teamId:"", feed:"", manual:""}
   ]
 };
+const PLATFORMS = {cbs:"CBS", espn:"ESPN", yahoo:"Yahoo"};
+function migrate(cfg){
+  (cfg.leagues||[]).forEach(L=>{
+    if(!PLATFORMS[L.platform]) L.platform = /espn/i.test(L.name||"") ? "espn" : (/yahoo/i.test(L.name||"") ? "yahoo" : "cbs");
+    if(!L.source) L.source = L.platform==="espn" ? "auto" : "paste";
+    if(L.source==="auto" && L.platform!=="espn") L.source = "paste";
+    if(L.feed===undefined) L.feed = "";
+  });
+  return cfg;
+}
 let CFG = (function(){
-  try{ const raw = store.get("sundayCommand"); if(raw) return Object.assign({}, DEFAULT_CFG, JSON.parse(raw)); }catch(e){}
+  try{ const raw = store.get("sundayCommand"); if(raw) return migrate(Object.assign({}, DEFAULT_CFG, JSON.parse(raw))); }catch(e){}
   return JSON.parse(JSON.stringify(DEFAULT_CFG));
 })();
 const saveCfg = () => store.set("sundayCommand", JSON.stringify(CFG));
@@ -452,82 +464,27 @@ async function jget(url, proxy){
   return r.json();
 }
 
-/* --- Sleeper --- */
-let SLEEPER_PLAYERS = null, SLEEPER_PROJ = {};
-async function sleeperPlayers(){
-  if(SLEEPER_PLAYERS) return SLEEPER_PLAYERS;
-  const j = await jget("https://api.sleeper.app/v1/players/nfl");
-  const map = {};
-  for(const id in j){
-    const p = j[id];
-    map[id] = {
-      name: p.full_name || p.last_name || (p.first_name||"") || id,
-      team: norm(p.team||""),
-      pos: (p.fantasy_positions&&p.fantasy_positions[0]) || p.position || ""
-    };
-  }
-  SLEEPER_PLAYERS = map; return map;
-}
-async function sleeperProj(season, week){
-  const key = season+"-"+week;
-  if(SLEEPER_PROJ[key]) return SLEEPER_PROJ[key];
-  const out = {};
-  try{
-    const url = "https://api.sleeper.app/projections/nfl/"+season+"/"+week+"?season_type=regular&position[]=QB&position[]=RB&position[]=WR&position[]=TE&position[]=K&position[]=DEF";
-    const j = await jget(url);
-    (Array.isArray(j)?j:[]).forEach(row=>{
-      const id = row.player_id || (row.player&&row.player.player_id);
-      const pts = row.stats && (row.stats.pts_ppr ?? row.stats.pts_half_ppr ?? row.stats.pts_std);
-      if(id && typeof pts==="number") out[id]=pts;
-    });
-  }catch(e){ /* projections are a nicety, not a requirement */ }
-  SLEEPER_PROJ[key]=out; return out;
-}
-async function loadSleeper(L, week){
-  if(!L.leagueId) throw new Error("Add your Sleeper league ID in setup.");
-  const league = await jget("https://api.sleeper.app/v1/league/"+L.leagueId);
-  const season = league.season || S.nfl.season;
-  const [pmeta, rosters, users, mus, proj] = await Promise.all([
-    sleeperPlayers(),
-    jget("https://api.sleeper.app/v1/league/"+L.leagueId+"/rosters"),
-    jget("https://api.sleeper.app/v1/league/"+L.leagueId+"/users"),
-    jget("https://api.sleeper.app/v1/league/"+L.leagueId+"/matchups/"+week),
-    sleeperProj(season, week)
-  ]);
-  const uname = (L.user||"").toLowerCase().trim();
-  const userById = {}; users.forEach(u=>userById[u.user_id]=u);
-  let mine = null;
-  if(uname){
-    const u = users.find(u => (u.display_name||"").toLowerCase()===uname || (u.metadata&&(u.metadata.team_name||"").toLowerCase()===uname));
-    if(u) mine = rosters.find(r=>r.owner_id===u.user_id);
-  }
-  if(!mine) mine = rosters[0];
-  const myMu = (mus||[]).find(m=>m.roster_id===mine.roster_id);
-  if(!myMu) throw new Error("No matchup found for week "+week+".");
-  const oppMu = (mus||[]).find(m=>m.matchup_id===myMu.matchup_id && m.roster_id!==mine.roster_id);
-  const oppR = oppMu ? rosters.find(r=>r.roster_id===oppMu.roster_id) : null;
-  const label = r => {
-    const u = r && userById[r.owner_id];
-    return (u && ((u.metadata&&u.metadata.team_name)||u.display_name)) || "Opponent";
-  };
-  const side = (mu) => {
-    if(!mu) return {name:"—", score:0, players:[]};
-    const pp = mu.players_points||{};
-    const roster = (mu.starters||[]).filter(id=>id && id!=="0").map(id=>{
-      const m = pmeta[id] || {};
-      const pos = m.pos || "FLEX";
+/* --- your own feed: a URL that returns the simple JSON shape below --- */
+async function loadFeed(L){
+  if(!L.feed) throw new Error("Add the URL your scraper writes to, in setup.");
+  const j = await jget(L.feed, CFG.proxy);
+  const side = (raw, fallback) => {
+    const o = raw || {};
+    const players = (o.players || o.starters || []).map(p=>{
+      const pos = (p.pos || p.position || "FLEX").toUpperCase();
       return {
-        name: m.name || id,
-        team: norm(m.team || (/^[A-Z]{2,3}$/.test(id) ? id : "")),
-        pos, pts: num(pp[id]),
-        proj: num(proj[id], POSPROJ[pos] || 10)
+        name: p.name || p.player || "Player",
+        team: norm(p.team || p.nfl || ""),
+        pos,
+        pts: num(parseFloat(p.pts ?? p.points ?? p.score), 0),
+        proj: num(parseFloat(p.proj ?? p.projection ?? p.projected), POSPROJ[pos] || 10)
       };
     });
-    return {score:num(mu.points), players:roster};
+    return {name: o.name || o.team || fallback, score: num(parseFloat(o.score ?? o.points ?? o.total), 0), players};
   };
-  const me = side(myMu), op = side(oppMu);
-  me.name = label(mine); op.name = label(oppR);
-  return {me, op};
+  const mine = j.me || j.mine || j.home || (j.teams && j.teams[0]);
+  const theirs = j.opp || j.op || j.opponent || j.away || (j.teams && j.teams[1]);
+  return {me: side(mine, "Me"), op: side(theirs, "Opponent")};
 }
 
 /* --- ESPN (public leagues only from a browser) --- */
@@ -967,7 +924,8 @@ function renderBoards(){
   function card(L, inner){
     const d = S.lg[L.id];
     const stamp = d && d.at ? new Date(d.at).toLocaleTimeString([], {hour:"numeric",minute:"2-digit",second:"2-digit"}) : "";
-    return '<div class="sb"><div class="tag"><b>'+esc(L.name||"League")+'</b><span>'+esc(L.platform==="manual"?"paste":L.platform)+' · '+stamp+'</span></div>'+inner+'</div>';
+    const src = L.source==="auto" ? "live" : (L.source==="feed" ? "feed" : "paste");
+    return '<div class="sb"><div class="tag"><b>'+esc(L.name||"League")+'</b><span>'+esc(src)+' · '+stamp+'</span></div>'+inner+'</div>';
   }
 }
 
@@ -1067,8 +1025,8 @@ async function tick(){
   await Promise.all(CFG.leagues.map(async L=>{
     try{
       let d;
-      if(L.platform==="sleeper") d = await loadSleeper(L, week);
-      else if(L.platform==="espn") d = await loadESPN(L, week);
+      if(L.source==="auto" && L.platform==="espn") d = await loadESPN(L, week);
+      else if(L.source==="feed") d = await loadFeed(L);
       else d = loadManual(L);
       d.at = Date.now(); S.lg[L.id] = d;
     }catch(e){
@@ -1094,27 +1052,33 @@ function drawCfg(){
   document.getElementById("wkIn").value = CFG.week || "";
   document.getElementById("proxyIn").value = CFG.proxy || "";
   document.getElementById("lgList").innerHTML = CFG.leagues.map((L,i)=>{
-    const sel = p => L.platform===p ? " selected" : "";
-    const show = (p) => L.platform===p ? "" : ' style="display:none"';
+    const sel = (v,cur) => v===cur ? " selected" : "";
+    const show = v => L.source===v ? "" : ' style="display:none"';
+    const srcOpts = (L.platform==="espn" ? '<option value="auto"'+sel("auto",L.source)+'>Pull it live</option>' : '')+
+      '<option value="feed"'+sel("feed",L.source)+'>My scraper feed</option>'+
+      '<option value="paste"'+sel("paste",L.source)+'>Paste the score</option>';
     return '<div class="lgcard" data-i="'+i+'">'+
       '<div class="top">'+
         '<input class="c-name" value="'+esc(L.name||"")+'" placeholder="League name" aria-label="League name">'+
-        '<select class="c-plat" aria-label="Platform"><option value="sleeper"'+sel("sleeper")+'>Sleeper (auto)</option>'+
-        '<option value="espn"'+sel("espn")+'>ESPN (auto, public)</option>'+
-        '<option value="manual"'+sel("manual")+'>Paste (Yahoo, Real Sports)</option></select>'+
+        '<select class="c-plat" aria-label="Platform">'+
+          '<option value="cbs"'+sel("cbs",L.platform)+'>CBS</option>'+
+          '<option value="espn"'+sel("espn",L.platform)+'>ESPN</option>'+
+          '<option value="yahoo"'+sel("yahoo",L.platform)+'>Yahoo</option></select>'+
+        '<select class="c-src" aria-label="Where the score comes from">'+srcOpts+'</select>'+
         '<button class="del" data-del="'+i+'">Remove</button>'+
       '</div>'+
-      '<div class="f-sleeper"'+show("sleeper")+'><div class="grid2">'+
-        '<div><label>League ID</label><input class="c-league" value="'+esc(L.leagueId||"")+'" placeholder="1180…"></div>'+
-        '<div><label>Your Sleeper username</label><input class="c-user" value="'+esc(L.user||"")+'" placeholder="dennisburns"></div>'+
-      '</div><div class="hint">The ID is the long number in your Sleeper league URL.</div></div>'+
-      '<div class="f-espn"'+show("espn")+'><div class="grid2">'+
-        '<div><label>League ID</label><input class="c-eleague" value="'+esc(L.leagueId||"")+'" placeholder="123456"></div>'+
+      '<div class="f-auto"'+show("auto")+'><div class="grid2">'+
+        '<div><label>ESPN league ID</label><input class="c-eleague" value="'+esc(L.leagueId||"")+'" placeholder="123456"></div>'+
         '<div><label>Your team ID</label><input class="c-team" value="'+esc(L.teamId||"")+'" placeholder="4"></div>'+
-      '</div><div class="hint">Both are in the ESPN league URL (leagueId= and teamId=). The league has to be public, or point a proxy at it below.</div></div>'+
-      '<div class="f-manual"'+show("manual")+'><label>Score line</label>'+
+      '</div><div class="hint">Both sit in the ESPN league URL. Works while the league is public; if yours is private, run it through the proxy below or switch this league to a feed.</div></div>'+
+      '<div class="f-feed"'+show("feed")+'>'+
+        '<label>Feed URL</label><input class="c-feed" value="'+esc(L.feed||"")+'" placeholder="https://…/cbs-week.json">'+
+        '<div class="hint">Point this at whatever your scraper writes. Expected shape: '+
+        '<code>{"me":{"name":"…","score":96.4,"players":[{"name":"R. Rice","team":"KC","pos":"WR","pts":12.4,"proj":14.4}]},"opp":{…}}</code> '+
+        'Anything missing falls back to a positional projection. Needs CORS enabled on the host, or route it through the proxy below.</div></div>'+
+      '<div class="f-paste"'+show("paste")+'><label>Score line</label>'+
         '<textarea class="c-manual" rows="7" placeholder="me Njigbas love rice 26.2&#10;Rice KC 14.4&#10;McBride ARI 14.3&#10;opp How I Metcalf your mother 27.8&#10;Jeanty LV 17.9&#10;Kelce KC 9.8">'+esc(L.manual||"")+'</textarea>'+
-        '<div class="hint">Start a side with “me” or “opp” plus the team name and its current score. Then one line per starter still to play: name, NFL team, projection. Live scores and the field pull from the real NFL feed, so these lines only need updating when your fantasy totals drift.</div></div>'+
+        '<div class="hint">Start a side with \u201cme\u201d or \u201copp\u201d plus the team name and its current score. Then one line per starter still to play: name, NFL team, projection. Field position and clock come from the live NFL feed either way, so these lines only need a nudge when your totals drift.</div></div>'+
     '</div>';
   }).join("");
 }
@@ -1122,15 +1086,18 @@ function readCfg(){
   const cards = [...document.querySelectorAll(".lgcard")];
   CFG.leagues = cards.map((c,i)=>{
     const old = CFG.leagues[i] || {};
+    const g = q => { const el = c.querySelector(q); return el ? el.value.trim() : ""; };
     const plat = c.querySelector(".c-plat").value;
-    const g = s => { const el = c.querySelector(s); return el ? el.value.trim() : ""; };
+    let src = c.querySelector(".c-src").value;
+    if(src==="auto" && plat!=="espn") src = "paste";
     return {
       id: old.id || ("L"+Date.now()+i),
-      name: g(".c-name") || "League",
+      name: g(".c-name") || PLATFORMS[plat] || "League",
       platform: plat,
-      leagueId: plat==="espn" ? g(".c-eleague") : g(".c-league"),
-      teamId: g(".c-team"),
-      user: g(".c-user"),
+      source: src,
+      leagueId: g(".c-eleague") || old.leagueId || "",
+      teamId: g(".c-team") || old.teamId || "",
+      feed: g(".c-feed") || old.feed || "",
       manual: c.querySelector(".c-manual") ? c.querySelector(".c-manual").value : (old.manual||"")
     };
   });
@@ -1144,7 +1111,7 @@ document.getElementById("closeCfg").onclick = () => { veil.hidden = true; };
 document.getElementById("saveCfg").onclick = () => { readCfg(); veil.hidden = true; S.lg = {}; render(); tick(); };
 document.getElementById("addLg").onclick = () => {
   readCfg();
-  CFG.leagues.push({id:"L"+Date.now(), name:"New league", platform:"manual", leagueId:"", teamId:"", user:"", manual:""});
+  CFG.leagues.push({id:"L"+Date.now(), name:"New league", platform:"cbs", source:"paste", leagueId:"", teamId:"", feed:"", manual:""});
   drawCfg();
 };
 document.getElementById("lgList").addEventListener("click", e=>{
@@ -1152,7 +1119,7 @@ document.getElementById("lgList").addEventListener("click", e=>{
   readCfg(); CFG.leagues.splice(Number(d.dataset.del),1); drawCfg();
 });
 document.getElementById("lgList").addEventListener("change", e=>{
-  if(!e.target.classList.contains("c-plat")) return;
+  if(!e.target.classList.contains("c-plat") && !e.target.classList.contains("c-src")) return;
   readCfg(); drawCfg();
 });
 veil.addEventListener("click", e=>{ if(e.target===veil) veil.hidden = true; });
