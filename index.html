@@ -256,6 +256,8 @@ label{display:block;font-size:10px;color:var(--chalk-dim);margin:6px 0 3px}
 .stepper input{text-align:center}
 .addleg{border:1px solid var(--bulb);color:var(--bulb);border-radius:3px;padding:7px 14px;font-size:11px;width:100%}
 .addleg:hover{background:var(--bulb);color:#0B120E}
+#syncBtn{border:1px solid var(--bulb);color:var(--bulb);border-radius:3px;padding:9px 14px;font-size:12px;font-weight:600;min-height:42px;white-space:nowrap}
+#syncBtn:hover,#syncBtn:active{background:var(--bulb);color:#0B120E}
 .payline{display:flex;justify-content:space-between;align-items:baseline;border-top:1px solid var(--line);
   margin-top:12px;padding-top:10px;font-size:11px;color:var(--chalk-dim)}
 .payline b{font-family:"Bebas Neue",sans-serif;font-size:26px;font-weight:400;color:var(--bulb)}
@@ -308,7 +310,7 @@ label{display:block;font-size:10px;color:var(--chalk-dim);margin:6px 0 3px}
     <div class="builder" style="margin-bottom:14px">
       <label for="syncIn">Sync code — enter the same one on every device to keep this setup everywhere</label>
       <div class="brow c2" style="margin-top:6px">
-        <input id="syncIn" placeholder="e.g. dennis-locker-room" autocapitalize="off" autocorrect="off">
+        <input id="syncIn" placeholder="e.g. dennis-locker-room" autocapitalize="off" autocorrect="off" autocomplete="off" enterkeyhint="go" style="min-height:42px">
         <button type="button" id="syncBtn">Sync this device</button>
       </div>
       <div class="hint" id="syncNote">Pick any code. The first device to use it seeds the cloud copy; every other device that enters the same code pulls it down, then everyone stays in sync automatically.</div>
@@ -1250,31 +1252,48 @@ function readCfg(){
   saveCfg();
 }
 
-document.getElementById("syncBtn").onclick = async () => {
-  const raw = document.getElementById("syncIn").value;
-  const code = String(raw||"").trim().toLowerCase().replace(/\s+/g,"-").replace(/[^a-z0-9_-]/g,"").slice(0,40);
-  if(code.length<3){ drawSyncStatus("Pick a code at least 3 characters — letters, numbers, - or _ only."); return; }
-  document.getElementById("syncIn").value = code;
-  drawSyncStatus("Checking the cloud for “"+code+"”…");
+async function runSync(){
   try{
-    const data = await syncFetch(code);
-    if(data){
-      adoptRemoteCfg(data);
-      setSyncCode(code);
-      drawCfg();
-      S.lg = {}; render(); tick();
-      drawSyncStatus("Pulled your setup from the cloud — this device is now synced under “"+code+"”.");
-    } else {
-      setSyncCode(code);
-      const ok = await syncPushNow();
-      drawSyncStatus(ok
-        ? "No cloud copy yet for that code — this device's setup is now the cloud copy. Enter “"+code+"” on your other devices to pull it down."
-        : "Saved the code, but couldn't reach the sync service just now — it'll push automatically once it's reachable.");
+    if(document.activeElement && document.activeElement.blur) document.activeElement.blur();
+    const raw = document.getElementById("syncIn").value;
+    const code = String(raw||"").trim().toLowerCase().replace(/\s+/g,"-").replace(/[^a-z0-9_-]/g,"").slice(0,40);
+    if(code.length<3){ drawSyncStatus("Pick a code at least 3 characters — letters, numbers, - or _ only."); return; }
+    document.getElementById("syncIn").value = code;
+    drawSyncStatus("Checking the cloud for “"+code+"”…");
+    try{
+      const data = await syncFetch(code);
+      if(data){
+        adoptRemoteCfg(data);
+        setSyncCode(code);
+        drawCfg();
+        S.lg = {}; render(); tick();
+        drawSyncStatus("Pulled your setup from the cloud — this device is now synced under “"+code+"”.");
+      } else {
+        setSyncCode(code);
+        const ok = await syncPushNow();
+        drawSyncStatus(ok
+          ? "No cloud copy yet for that code — this device's setup is now the cloud copy. Enter “"+code+"” on your other devices to pull it down."
+          : "Saved the code, but couldn't reach the sync service just now — it'll push automatically once it's reachable.");
+      }
+    }catch(e){
+      drawSyncStatus("Couldn't reach the sync service — try again in a moment.");
     }
   }catch(e){
-    drawSyncStatus("Couldn't reach the sync service — try again in a moment.");
+    drawSyncStatus("Something went wrong ("+(e && e.message ? e.message : String(e))+") — try again.");
   }
-};
+}
+document.getElementById("syncBtn").onclick = runSync;
+document.getElementById("syncIn").addEventListener("keydown", e=>{
+  if(e.key==="Enter"){ e.preventDefault(); runSync(); }
+});
+/* Safety net: if anything throws while the setup panel is open, show it instead of
+   failing silently — this is how a real device's exact error gets surfaced next time. */
+window.addEventListener("error", e=>{
+  if(!veil.hidden) drawSyncStatus("Unexpected error: "+(e && e.message ? e.message : "script error"));
+});
+window.addEventListener("unhandledrejection", e=>{
+  if(!veil.hidden) drawSyncStatus("Unexpected error: "+(e && e.reason && e.reason.message ? e.reason.message : String(e && e.reason)));
+});
 document.getElementById("openCfg").onclick = () => { drawCfg(); veil.hidden = false; };
 document.getElementById("closeCfg").onclick = () => { veil.hidden = true; };
 document.getElementById("saveCfg").onclick = () => { readCfg(); veil.hidden = true; S.lg = {}; render(); tick(); };
