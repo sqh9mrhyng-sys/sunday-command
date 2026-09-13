@@ -17,6 +17,8 @@
   --bulb:#F2A93B;
   --redzone:#E2503F;
   --cool:#5BB8A0;
+  --green:#59C36A;
+  --purple:#B98CFF;
   --pad:14px;
 }
 *{box-sizing:border-box}
@@ -55,7 +57,7 @@ textarea{line-height:1.6;resize:vertical}
 .bar button.tool:hover{border-color:var(--bulb);color:var(--bulb)}
 
 /* ---------- shell ---------- */
-.shell{display:grid;grid-template-columns:minmax(260px,26%) 1fr;gap:1px;background:var(--line);min-height:calc(100vh - 47px)}
+.shell{display:grid;grid-template-columns:1fr minmax(260px,26%);gap:1px;background:var(--line);min-height:calc(100vh - 47px)}
 .rail,.stage{background:var(--turf);padding:var(--pad)}
 .stage{display:flex;flex-direction:column;gap:var(--pad)}
 
@@ -115,6 +117,29 @@ textarea{line-height:1.6;resize:vertical}
 .lever .v.o{color:var(--redzone)}
 .counts{display:flex;gap:14px;font-size:10px;color:var(--chalk-dim)}
 .counts b{color:var(--chalk);font-weight:400}
+
+/* ---------- matchup score header (above each lineup) ---------- */
+.matchscore{display:flex;align-items:flex-end;justify-content:space-between;gap:10px}
+.matchscore .side{display:flex;flex-direction:column;min-width:0}
+.matchscore .side.opp{align-items:flex-end;text-align:right}
+.matchscore .nm{font-size:10.5px;color:var(--chalk-dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:14ch}
+.matchscore .pt{font-family:"Bebas Neue",sans-serif;font-size:34px;line-height:1}
+.matchscore .side.me .pt{color:var(--bulb)}
+.matchscore .pj{font-size:10px;color:var(--chalk-dim)}
+.matchscore .vs{font-size:10px;color:var(--chalk-dim);padding-bottom:6px}
+
+/* ---------- my lineup ---------- */
+.lineup{width:100%;border-collapse:collapse;font-size:12px;margin-top:2px}
+.lineup td{padding:5px 0;border-bottom:1px dashed var(--line);vertical-align:top}
+.lineup tr:last-child td{border-bottom:none}
+.lineup .p{color:var(--chalk-dim)}
+.lineup .t{color:var(--chalk-dim);font-size:10px;margin-top:2px}
+.lineup .v{text-align:right;font-family:"Bebas Neue",sans-serif;font-size:18px;white-space:nowrap;color:var(--chalk-dim)}
+.lineup .v .t{font-family:"DM Mono",ui-monospace,monospace;font-size:9.5px;margin-top:1px}
+.lineup tr.done .p,.lineup tr.done .v{color:var(--green)}
+.lineup tr.live .p,.lineup tr.live .v{color:var(--purple)}
+.lineup tr.pre .p,.lineup tr.pre .v{color:var(--redzone)}
+.rail .tickets{grid-template-columns:1fr}
 
 /* ---------- field ---------- */
 .fieldwrap{border:1px solid var(--line);border-radius:4px;background:var(--turf-2);padding:10px 12px 12px}
@@ -254,32 +279,24 @@ label{display:block;font-size:10px;color:var(--chalk-dim);margin:6px 0 3px}
 </div>
 
 <div class="shell">
-  <aside class="rail">
-    <div class="head"><h2>My matchups</h2><span class="rule"></span></div>
-    <div id="boards"></div>
+  <section class="stage">
+    <div>
+      <div class="head"><h2>My lineups</h2><span class="rule"></span><span class="note" id="needNote"></span></div>
+      <div class="needs" id="needs"></div>
+    </div>
+  </section>
 
-    <div class="head" style="margin-top:18px"><h2>On the board</h2><span class="rule"></span></div>
+  <aside class="rail">
+    <div class="head"><h2>On the board</h2><span class="rule"></span></div>
     <div class="picker">
       <select id="gamePick"><option value="">Pick a game to follow</option></select>
       <button id="addGame">Add</button>
     </div>
     <div id="games"></div>
-  </aside>
 
-  <section class="stage">
-    <div>
-      <div class="head"><h2>What it takes</h2><span class="rule"></span><span class="note" id="needNote"></span></div>
-      <div class="needs" id="needs"></div>
-    </div>
-    <div>
-      <div class="head"><h2>Tickets</h2><span class="rule"></span><span class="note" id="tixNote"></span></div>
-      <div class="tickets" id="tickets"></div>
-    </div>
-    <div>
-      <div class="head"><h2>Closest to paydirt</h2><span class="rule"></span><span class="note">only players whose team has the ball right now</span></div>
-      <div id="fields"></div>
-    </div>
-  </section>
+    <div class="head" style="margin-top:18px"><h2>Tickets</h2><span class="rule"></span><span class="note" id="tixNote"></span></div>
+    <div class="tickets" id="tickets"></div>
+  </aside>
 </div>
 
 <div class="veil" id="veil" hidden>
@@ -378,6 +395,30 @@ const ESPN_TEAM = {1:"ATL",2:"BUF",3:"CHI",4:"CIN",5:"CLE",6:"DAL",7:"DEN",8:"DE
 const ESPN_POS  = {1:"QB",2:"RB",3:"WR",4:"TE",5:"K",16:"DEF"};
 const ALIAS = {JAC:"JAX", WAS:"WSH", LA:"LAR", OAK:"LV", SD:"LAC", STL:"LAR"};
 const norm = t => ALIAS[(t||"").toUpperCase()] || (t||"").toUpperCase();
+
+/* human statline from ESPN's raw counting stats, keyed by well-known stat ids */
+function statLine(pos, raw){
+  if(!raw) return "";
+  const g = k => raw[k];
+  const parts = [];
+  if(pos==="QB"){
+    if(g(3)!=null) parts.push(Math.round(g(3))+" P-YDS");
+    if(g(4)) parts.push(Math.round(g(4))+" P-TD");
+    if(g(20)) parts.push(Math.round(g(20))+" INT");
+    if(g(24)) parts.push(Math.round(g(24))+" RUSH");
+  } else if(pos==="RB"){
+    if(g(24)!=null) parts.push(Math.round(g(24))+" RUSH");
+    if(g(25)) parts.push(Math.round(g(25))+" TD");
+    if(g(53)) parts.push(Math.round(g(53))+" REC");
+    if(g(42)) parts.push(Math.round(g(42))+" REC-YDS");
+  } else if(pos==="WR"||pos==="TE"){
+    if(g(53)!=null) parts.push(Math.round(g(53))+" REC");
+    if(g(42)!=null) parts.push(Math.round(g(42))+" YDS");
+    if(g(43)) parts.push(Math.round(g(43))+" TD");
+    if(g(24)) parts.push(Math.round(g(24))+" RUSH");
+  }
+  return parts.join(" · ");
+}
 
 const num = (v,d=0) => (typeof v==="number" && isFinite(v)) ? v : d;
 const f1 = v => (Math.round(v*10)/10).toFixed(1);
@@ -492,7 +533,7 @@ async function loadESPN(L, week){
   if(!L.leagueId) throw new Error("Add your ESPN league ID in setup.");
   const season = S.nfl.season || new Date().getFullYear();
   const url = "https://lm-api-reads.fantasy.espn.com/apis/v3/games/ffl/seasons/"+season+
-    "/segments/0/leagues/"+L.leagueId+"?view=mBoxscore&view=mMatchupScore&view=mRoster&view=mTeam&scoringPeriodId="+week;
+    "/segments/0/leagues/"+L.leagueId+"?view=mBoxscore&view=mMatchupScore&view=mRoster&view=mTeam&view=mLiveScoring&scoringPeriodId="+week;
   let j;
   try{ j = await jget(url, CFG.proxy); }
   catch(e){ throw new Error("ESPN blocked the request. Make the league public, add a proxy in setup, or switch this league to paste mode."); }
@@ -511,21 +552,23 @@ async function loadESPN(L, week){
     const players = entries.filter(en => en.lineupSlotId!==20 && en.lineupSlotId!==21).map(en=>{
       const p = en.playerPoolEntry?.player || {};
       const stats = p.stats||[];
-      const pick = (src) => {
-        const s = stats.find(s=>s.statSourceId===src && s.statSplitTypeId===1 && Number(s.scoringPeriodId)===Number(week));
-        return s ? num(s.appliedTotal) : null;
-      };
+      const rec = (src) => stats.find(s=>s.statSourceId===src && s.statSplitTypeId===1 && Number(s.scoringPeriodId)===Number(week));
+      const actual = rec(0), projected = rec(1);
       const pos = ESPN_POS[p.defaultPositionId] || "FLEX";
       return {
         name: p.fullName || "Player",
         team: ESPN_TEAM[p.proTeamId] || "",
         pos,
-        pts: num(pick(0), num(en.playerPoolEntry?.appliedStatTotal)),
-        proj: num(pick(1), POSPROJ[pos] || 10)
+        pts: num(actual ? actual.appliedTotal : null, num(en.playerPoolEntry?.appliedStatTotal)),
+        proj: num(projected ? projected.appliedTotal : null, POSPROJ[pos] || 10),
+        raw: (actual && actual.stats) || null
       };
     });
     const total = (typeof E.totalPointsLive === "number") ? E.totalPointsLive : num(E.totalPoints);
-    return {name: teams[E.teamId] || "Team", score: num(total), players};
+    const projTotal = (typeof E.totalProjectedPointsLive === "number") ? E.totalProjectedPointsLive
+      : (typeof E.totalProjectedPoints === "number" ? E.totalProjectedPoints : null);
+    const winProb = typeof E.winProbability === "number" ? E.winProbability : null;
+    return {name: teams[E.teamId] || "Team", score: num(total), players, projTotal, winProb};
   };
   return {me: side(A), op: side(B)};
 }
@@ -568,9 +611,9 @@ function analyse(side){
     p._left = left; p._frac = fr; p._game = g;
     rem += left;
     varSum += Math.pow(0.55*Math.max(left,0), 2);
-    if(fr<=0) done++;
-    else if(g && g.state==="in"){ live++; open.push(p); }
-    else { pend++; open.push(p); }
+    if(fr<=0){ done++; p._state = "done"; }
+    else if(g && g.state==="in"){ live++; open.push(p); p._state = "live"; }
+    else { pend++; open.push(p); p._state = "pre"; }
   });
   open.sort((a,b)=>b._left-a._left);
   return {now:side.score, rem, proj:side.score+rem, live, pend, done, open, sd:Math.sqrt(varSum)};
@@ -903,30 +946,7 @@ document.getElementById("tickets").addEventListener("click", e => {
 
 /* ============================ rendering ============================ */
 function render(){
-  renderBoards(); renderGames(); renderNeeds(); renderTickets(); renderFields();
-}
-
-function renderBoards(){
-  const host = document.getElementById("boards");
-  host.innerHTML = CFG.leagues.map(L=>{
-    const d = S.lg[L.id];
-    if(!d) return card(L, '<div class="err">Loading…</div>');
-    if(d.err) return card(L, '<div class="err">'+esc(d.err)+'</div>');
-    const v = verdict(L);
-    const row = (side, an, mine) =>
-      '<div class="row '+(mine?"me ":"")+(an.proj > (mine?v.B.proj:v.A.proj) ? "lead":"")+'">'+
-        '<div class="who">'+esc(side.name)+'</div>'+
-        '<div><div class="pts">'+f1(an.now)+'</div><div class="proj">proj '+f1(an.proj)+'</div></div>'+
-      '</div>';
-    return card(L, row(d.me, v.A, true) + row(d.op, v.B, false));
-  }).join("") || '<div class="err" style="border:1px solid var(--line);border-radius:4px;padding:10px">No leagues yet — open setup and add one.</div>';
-
-  function card(L, inner){
-    const d = S.lg[L.id];
-    const stamp = d && d.at ? new Date(d.at).toLocaleTimeString([], {hour:"numeric",minute:"2-digit",second:"2-digit"}) : "";
-    const src = L.source==="auto" ? "live" : (L.source==="feed" ? "feed" : "paste");
-    return '<div class="sb"><div class="tag"><b>'+esc(L.name||"League")+'</b><span>'+esc(src)+' · '+stamp+'</span></div>'+inner+'</div>';
-  }
+  renderGames(); renderNeeds(); renderTickets();
 }
 
 function renderGames(){
@@ -955,62 +975,43 @@ function renderNeeds(){
   const host = document.getElementById("needs");
   document.getElementById("needNote").textContent = S.nfl.ok ? "recalculated every 15 seconds off the live clock" : "";
   host.innerHTML = CFG.leagues.map(L=>{
+    const d = S.lg[L.id];
+    if(!d) return '<div class="need"><div class="lg">'+esc(L.name)+'</div><div class="wpline">Loading…</div></div>';
+    if(d.err) return '<div class="need"><div class="lg">'+esc(L.name)+'</div><div class="wpline">'+esc(d.err)+'</div></div>';
     const v = verdict(L);
-    if(!v) return '<div class="need"><div class="lg">'+esc(L.name)+'</div><div class="wpline">'+esc((S.lg[L.id]&&S.lg[L.id].err)||"Loading…")+'</div></div>';
-    const {A,B,gap,win} = v;
-    const behind = gap > 0;
-    const headline = behind ? f1(gap) : f1(-gap);
-    const cap = behind
-      ? (A.open.length ? "points to find across "+A.open.length+" live starters" : "points short with nobody left to play")
-      : (B.open.length ? "point cushion with "+B.open.length+" of theirs still out there" : "points clear and their board is done");
-    const levers = A.open.slice(0,3).map(p=>{
-      const target = p.proj + Math.max(0, gap);
-      return '<tr><td class="p">'+esc(p.name)+'<div class="t">'+esc(p.team||"—")+' · '+(p._game&&p._game.state==="in"?esc(p._game.detail):"not started")+'</div></td>'+
-             '<td class="v">'+f1(target)+'</td></tr>';
+    if(!v) return '<div class="need"><div class="lg">'+esc(L.name)+'</div><div class="wpline">Loading…</div></div>';
+    const {A,B} = v;
+    // prefer the platform's own win probability / live projection when it hands us one (ESPN does)
+    const win = (typeof d.me.winProb==="number") ? d.me.winProb : v.win;
+    const projA = (typeof d.me.projTotal==="number") ? d.me.projTotal : A.proj;
+    const projB = (typeof d.op.projTotal==="number") ? d.op.projTotal : B.proj;
+
+    const rows = (d.me.players||[]).map(p=>{
+      const cls = p._state || "pre";
+      const sl = statLine(p.pos, p.raw);
+      const subBits = [p.team||"—"];
+      if(sl) subBits.push(sl);
+      else if(cls==="live" && p._game) subBits.push(esc(p._game.detail));
+      let val;
+      if(cls==="done") val = f1(p.pts);
+      else if(cls==="live") val = f1(p.pts)+'<div class="t">proj '+f1(p.proj)+'</div>';
+      else val = 'proj '+f1(p.proj);
+      return '<tr class="'+cls+'"><td class="p">'+esc(p.name)+'<div class="t">'+subBits.map(esc).join(" · ")+'</div></td>'+
+        '<td class="v">'+val+'</td></tr>';
     }).join("");
-    const threat = B.open.slice(0,2).map(p=>
-      '<tr><td class="p">'+esc(p.name)+'<div class="t">their '+esc(p.team||"—")+' · '+f1(p._left)+' left</div></td>'+
-      '<td class="v o">'+f1(p.pts)+'</td></tr>').join("");
+
     return '<div class="need">'+
       '<div class="lg">'+esc(L.name)+'</div>'+
-      '<div class="verdict'+(behind?"":" safe")+'"><div class="num">'+headline+'</div><div class="cap">'+cap+'</div></div>'+
+      '<div class="matchscore">'+
+        '<div class="side me"><span class="nm">'+esc(d.me.name)+'</span><span class="pt">'+f1(A.now)+'</span><span class="pj">proj '+f1(projA)+'</span></div>'+
+        '<span class="vs">vs</span>'+
+        '<div class="side opp"><span class="nm">'+esc(d.op.name)+'</span><span class="pt">'+f1(B.now)+'</span><span class="pj">proj '+f1(projB)+'</span></div>'+
+      '</div>'+
       '<div><div class="wp'+(win<0.5?" bad":"")+'"><i style="width:'+Math.round(win*100)+'%"></i></div>'+
-        '<div class="wpline"><span>win '+Math.round(win*100)+'%</span><span>'+f1(A.proj)+' – '+f1(B.proj)+' projected</span></div></div>'+
-      '<div class="counts"><span>mine <b>'+A.done+'</b> done · <b>'+A.live+'</b> live · <b>'+A.pend+'</b> to come</span>'+
-        '<span>theirs <b>'+B.done+'</b>/<b>'+B.live+'</b>/<b>'+B.pend+'</b></span></div>'+
-      (levers ? '<table class="lever">'+levers+'</table><div class="wpline"><span>what each needs to end with, carrying the gap alone</span></div>' : '')+
-      (threat ? '<table class="lever">'+threat+'</table><div class="wpline"><span>their live scorers</span></div>' : '')+
+        '<div class="wpline"><span>win '+Math.round(win*100)+'%</span><span>'+f1(projA)+' – '+f1(projB)+' projected</span></div></div>'+
+      '<div class="counts"><span>mine <b>'+A.done+'</b> done · <b>'+A.live+'</b> live · <b>'+A.pend+'</b> to come</span></div>'+
+      '<table class="lineup">'+rows+'</table>'+
     '</div>';
-  }).join("");
-}
-
-function renderFields(){
-  const host = document.getElementById("fields");
-  host.innerHTML = CFG.leagues.map(L=>{
-    const d = S.lg[L.id];
-    let markers = [], note = "";
-    if(d && !d.err){
-      const grab = (side, cls) => side.players.filter(p=>hasBall(p.team)).map(p=>{
-        const g = gameOf(p.team);
-        return {name:p.name, team:p.team, ytg:(g&&g.ytg!=null)?g.ytg:50, rz:!!(g&&g.rz), dd:(g&&g.dd)||"", cls};
-      });
-      markers = grab(d.me,"top").concat(grab(d.op,"bot opp"));
-      const rz = markers.filter(m=>m.ytg<=20).length;
-      note = markers.length ? markers.length+" in a live drive"+(rz?" · "+rz+" inside the 20":"") : "";
-    }
-    const inner = markers.length
-      ? markers.map(m=>{
-          const left = Math.max(2, Math.min(96, 100 - m.ytg));
-          const pos = m.cls.indexOf("top")===0 ? "top" : "bot opp";
-          return '<div class="mk '+pos+'" style="left:'+left+'%">'+
-            (pos==="top"
-              ? '<div class="yd">'+m.ytg+'</div><div class="nm">'+esc(m.name)+'</div><div class="dot"></div>'
-              : '<div class="dot"></div><div class="nm">'+esc(m.name)+'</div><div class="yd">'+m.ytg+'</div>')+
-          '</div>';
-        }).join("")
-      : '<div class="empty">'+(d&&d.err ? esc(d.err) : "Nobody from this matchup has the ball. The field lights up the moment one of them does.")+'</div>';
-    return '<div class="fieldwrap"><div class="fhead"><b>'+esc(L.name)+'</b><span>'+esc(note)+'</span></div>'+
-      '<div class="field"><div class="mid"></div><div class="ez"></div>'+inner+'</div></div>';
   }).join("");
 }
 
