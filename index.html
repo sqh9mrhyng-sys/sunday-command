@@ -424,10 +424,29 @@ function statLine(pos, raw){
 }
 
 /* position ordering: QB / RB / RB / WR / WR / TE / FLEX / K / DEF (superflex leagues just stack two QBs) */
-const POS_PRIORITY = {QB:0, RB:1, WR:2, TE:3, FLEX:3.5, K:4, DEF:5, DST:5};
-const orderPlayers = list => list.map((p,i)=>({p,i})).sort((a,b)=>
-  ((POS_PRIORITY[a.p.pos] ?? 3.5) - (POS_PRIORITY[b.p.pos] ?? 3.5)) || (a.i-b.i)
-).map(x=>x.p);
+// Buckets players into exact roster slots: QB (qbSlots of them), RB x2, WR x2, TE x1,
+// then any leftover skill players as FLEX (in original order), then K, then DEF.
+function orderPlayers(list, qbSlots){
+  qbSlots = qbSlots || 1;
+  const tagged = list.map((p,i)=>({p,i}));
+  const buckets = {QB:[], RB:[], WR:[], TE:[], K:[], DEF:[], OTHER:[]};
+  tagged.forEach(x=>{
+    const pos = x.p.pos === "DST" ? "DEF" : (x.p.pos || "OTHER");
+    (buckets[pos] || buckets.OTHER).push(x);
+  });
+  const takeN = (arr,n) => arr.splice(0, n);
+  const out = [];
+  out.push(...takeN(buckets.QB, qbSlots));
+  out.push(...takeN(buckets.RB, 2));
+  out.push(...takeN(buckets.WR, 2));
+  out.push(...takeN(buckets.TE, 1));
+  const flexPool = [...buckets.QB, ...buckets.RB, ...buckets.WR, ...buckets.TE, ...buckets.OTHER]
+    .sort((a,b)=>a.i-b.i);
+  out.push(...flexPool);
+  out.push(...buckets.K);
+  out.push(...buckets.DEF);
+  return out.map(x=>x.p);
+}
 
 /* pasted lines have no position column, so guess it: team defenses by name, everyone else off the real NFL roster */
 const DEF_NAMES = new Set(["cardinals","falcons","ravens","bills","panthers","bears","bengals","browns","cowboys","broncos","lions","packers","texans","colts","jaguars","chiefs","raiders","chargers","rams","dolphins","vikings","patriots","saints","giants","jets","eagles","steelers","49ers","niners","seahawks","buccaneers","bucs","titans","commanders"]);
@@ -1040,7 +1059,8 @@ function renderNeeds(){
     const projA = (typeof d.me.projTotal==="number") ? d.me.projTotal : A.proj;
     const projB = (typeof d.op.projTotal==="number") ? d.op.projTotal : B.proj;
 
-    const rowsFor = players => orderPlayers(players||[]).map(p=>{
+    const qbSlots = L.platform==="cbs" ? 2 : 1; // CBS leagues run superflex (QB/QB)
+    const rowsFor = players => orderPlayers(players||[], qbSlots).map(p=>{
       const cls = p._state || "pre";
       const sl = statLine(p.pos, p.raw);
       const subBits = [p.team||"—"];
