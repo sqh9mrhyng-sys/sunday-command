@@ -97,7 +97,7 @@ textarea{line-height:1.6;resize:vertical}
 .picker button:hover{border-color:var(--bulb);color:var(--bulb)}
 
 /* ---------- needs board ---------- */
-.needs{display:grid;gap:var(--pad);grid-template-columns:repeat(auto-fit,minmax(280px,1fr))}
+.needs{display:grid;gap:var(--pad);grid-template-columns:repeat(auto-fit,minmax(430px,1fr))}
 .need{border:1px solid var(--line);border-radius:4px;background:var(--turf-2);padding:12px 13px;display:flex;flex-direction:column;gap:10px}
 .need .lg{font-family:"Bebas Neue",sans-serif;font-size:16px;letter-spacing:.04em;color:var(--chalk-dim)}
 .verdict{display:flex;align-items:flex-end;gap:10px}
@@ -139,6 +139,9 @@ textarea{line-height:1.6;resize:vertical}
 .lineup tr.done .p,.lineup tr.done .v{color:var(--green)}
 .lineup tr.live .p,.lineup tr.live .v{color:var(--purple)}
 .lineup tr.pre .p,.lineup tr.pre .v{color:var(--redzone)}
+.lineups2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.lineups2 .col{min-width:0}
+.lineups2 .hd{font-size:10px;color:var(--chalk-dim);text-transform:uppercase;letter-spacing:.04em;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .rail .tickets{grid-template-columns:1fr}
 
 /* ---------- field ---------- */
@@ -420,6 +423,55 @@ function statLine(pos, raw){
   return parts.join(" · ");
 }
 
+/* position ordering: QB / RB / RB / WR / WR / TE / FLEX / K / DEF (superflex leagues just stack two QBs) */
+const POS_PRIORITY = {QB:0, RB:1, WR:2, TE:3, FLEX:3.5, K:4, DEF:5, DST:5};
+const orderPlayers = list => list.map((p,i)=>({p,i})).sort((a,b)=>
+  ((POS_PRIORITY[a.p.pos] ?? 3.5) - (POS_PRIORITY[b.p.pos] ?? 3.5)) || (a.i-b.i)
+).map(x=>x.p);
+
+/* pasted lines have no position column, so guess it: team defenses by name, everyone else off the real NFL roster */
+const DEF_NAMES = new Set(["cardinals","falcons","ravens","bills","panthers","bears","bengals","browns","cowboys","broncos","lions","packers","texans","colts","jaguars","chiefs","raiders","chargers","rams","dolphins","vikings","patriots","saints","giants","jets","eagles","steelers","49ers","niners","seahawks","buccaneers","bucs","titans","commanders"]);
+const guessDefPos = name => DEF_NAMES.has(String(name||"").toLowerCase().trim()) ? "DEF" : null;
+
+const ROSTER_CACHE = {};
+function teamShortNameMap(teamAb){
+  const key = norm(teamAb);
+  if(!key) return Promise.resolve({});
+  if(ROSTER_CACHE[key]) return ROSTER_CACHE[key];
+  const p = (async () => {
+    try{
+      const r = await fetch("https://site.api.espn.com/apis/site/v2/sports/football/nfl/teams/"+key.toLowerCase()+"/roster", {cache:"no-store"});
+      if(!r.ok) return {};
+      const j = await r.json();
+      const map = {};
+      (j.athletes||[]).forEach(grp=>{
+        (grp.items||[]).forEach(it=>{
+          let pos = (it.position && it.position.abbreviation) || "";
+          if(pos==="PK") pos = "K";
+          if(!["QB","RB","WR","TE","K"].includes(pos)) return;
+          const k1 = String(it.shortName||"").toLowerCase().trim();
+          const k2 = String(it.displayName||"").toLowerCase().trim();
+          if(k1) map[k1] = pos;
+          if(k2) map[k2] = pos;
+        });
+      });
+      return map;
+    }catch(e){ return {}; }
+  })();
+  ROSTER_CACHE[key] = p;
+  return p;
+}
+async function resolvePositions(players){
+  await Promise.all((players||[]).map(async p=>{
+    if(p.pos && p.pos!=="FLEX") return;
+    const d = guessDefPos(p.name);
+    if(d){ p.pos = d; return; }
+    const map = await teamShortNameMap(p.team);
+    const k = String(p.name||"").toLowerCase().trim();
+    if(map[k]) p.pos = map[k];
+  }));
+}
+
 const num = (v,d=0) => (typeof v==="number" && isFinite(v)) ? v : d;
 const f1 = v => (Math.round(v*10)/10).toFixed(1);
 const fnum = v => { const n = Number(v); return Number.isInteger(n) ? String(n) : f1(n); };
@@ -574,7 +626,7 @@ async function loadESPN(L, week){
 }
 
 /* --- paste mode (Yahoo, Real Sports, anything closed) --- */
-function loadManual(L){
+async function loadManual(L){
   const txt = (L.manual||"").trim();
   if(!txt) throw new Error("Paste your score line in setup to light this one up.");
   const out = {me:{name:"Me", score:0, players:[]}, op:{name:"Opponent", score:0, players:[]}};
@@ -597,6 +649,7 @@ function loadManual(L){
       out[cur].players.push({name:m[1].trim(), team:norm(m[2]), pos:"FLEX", proj:parseFloat(m[3]), pts:m[4]?parseFloat(m[4]):0});
     }
   });
+  await Promise.all([resolvePositions(out.me.players), resolvePositions(out.op.players)]);
   return out;
 }
 
@@ -981,21 +1034,22 @@ function renderNeeds(){
     const v = verdict(L);
     if(!v) return '<div class="need"><div class="lg">'+esc(L.name)+'</div><div class="wpline">Loading…</div></div>';
     const {A,B} = v;
+    const num1 = val => L.platform==="cbs" ? String(Math.round(val)) : f1(val); // CBS scores whole points only
     // prefer the platform's own win probability / live projection when it hands us one (ESPN does)
     const win = (typeof d.me.winProb==="number") ? d.me.winProb : v.win;
     const projA = (typeof d.me.projTotal==="number") ? d.me.projTotal : A.proj;
     const projB = (typeof d.op.projTotal==="number") ? d.op.projTotal : B.proj;
 
-    const rows = (d.me.players||[]).map(p=>{
+    const rowsFor = players => orderPlayers(players||[]).map(p=>{
       const cls = p._state || "pre";
       const sl = statLine(p.pos, p.raw);
       const subBits = [p.team||"—"];
       if(sl) subBits.push(sl);
       else if(cls==="live" && p._game) subBits.push(esc(p._game.detail));
       let val;
-      if(cls==="done") val = f1(p.pts);
-      else if(cls==="live") val = f1(p.pts)+'<div class="t">proj '+f1(p.proj)+'</div>';
-      else val = 'proj '+f1(p.proj);
+      if(cls==="done") val = num1(p.pts);
+      else if(cls==="live") val = num1(p.pts)+'<div class="t">proj '+num1(p.proj)+'</div>';
+      else val = 'proj '+num1(p.proj);
       return '<tr class="'+cls+'"><td class="p">'+esc(p.name)+'<div class="t">'+subBits.map(esc).join(" · ")+'</div></td>'+
         '<td class="v">'+val+'</td></tr>';
     }).join("");
@@ -1003,14 +1057,16 @@ function renderNeeds(){
     return '<div class="need">'+
       '<div class="lg">'+esc(L.name)+'</div>'+
       '<div class="matchscore">'+
-        '<div class="side me"><span class="nm">'+esc(d.me.name)+'</span><span class="pt">'+f1(A.now)+'</span><span class="pj">proj '+f1(projA)+'</span></div>'+
+        '<div class="side me"><span class="nm">'+esc(d.me.name)+'</span><span class="pt">'+num1(A.now)+'</span><span class="pj">proj '+num1(projA)+'</span></div>'+
         '<span class="vs">vs</span>'+
-        '<div class="side opp"><span class="nm">'+esc(d.op.name)+'</span><span class="pt">'+f1(B.now)+'</span><span class="pj">proj '+f1(projB)+'</span></div>'+
+        '<div class="side opp"><span class="nm">'+esc(d.op.name)+'</span><span class="pt">'+num1(B.now)+'</span><span class="pj">proj '+num1(projB)+'</span></div>'+
       '</div>'+
       '<div><div class="wp'+(win<0.5?" bad":"")+'"><i style="width:'+Math.round(win*100)+'%"></i></div>'+
-        '<div class="wpline"><span>win '+Math.round(win*100)+'%</span><span>'+f1(projA)+' – '+f1(projB)+' projected</span></div></div>'+
-      '<div class="counts"><span>mine <b>'+A.done+'</b> done · <b>'+A.live+'</b> live · <b>'+A.pend+'</b> to come</span></div>'+
-      '<table class="lineup">'+rows+'</table>'+
+        '<div class="wpline"><span>win '+Math.round(win*100)+'%</span><span>'+num1(projA)+' – '+num1(projB)+' projected</span></div></div>'+
+      '<div class="lineups2">'+
+        '<div class="col"><div class="hd">'+esc(d.me.name)+'</div><table class="lineup">'+rowsFor(d.me.players)+'</table></div>'+
+        '<div class="col"><div class="hd">'+esc(d.op.name)+'</div><table class="lineup">'+rowsFor(d.op.players)+'</table></div>'+
+      '</div>'+
     '</div>';
   }).join("");
 }
@@ -1028,7 +1084,7 @@ async function tick(){
       let d;
       if(L.source==="auto" && L.platform==="espn") d = await loadESPN(L, week);
       else if(L.source==="feed") d = await loadFeed(L);
-      else d = loadManual(L);
+      else d = await loadManual(L);
       d.at = Date.now(); S.lg[L.id] = d;
     }catch(e){
       S.lg[L.id] = {err: e.message || "Could not load this league.", me:{name:"—",score:0,players:[]}, op:{name:"—",score:0,players:[]}};
