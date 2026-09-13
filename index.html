@@ -82,13 +82,18 @@ textarea{line-height:1.6;resize:vertical}
 .sb .err{padding:8px 9px;color:var(--redzone);font-size:11px}
 
 /* ---------- live games ---------- */
-.game{border:1px solid var(--line);border-radius:4px;padding:7px 9px;margin-bottom:7px;background:var(--turf-2);position:relative}
+.game{border:1px solid var(--line);border-radius:4px;padding:9px 10px;margin-bottom:9px;background:var(--turf-2);position:relative}
 .game.rz{border-color:var(--redzone)}
-.game .g{display:flex;justify-content:space-between;font-size:12px}
-.game .g b{font-family:"Bebas Neue",sans-serif;font-size:17px;font-weight:400}
-.game .st{font-size:10px;color:var(--chalk-dim);margin-top:3px;display:flex;justify-content:space-between;gap:8px}
-.game .st .ball{color:var(--bulb)}
-.game.rz .st .ball{color:var(--redzone)}
+.game .gm{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+.game .gt{flex:1;min-width:0}
+.game .gt.home{text-align:right}
+.game .gt .nm{font-family:"Bebas Neue",sans-serif;font-size:17px;line-height:1.12;letter-spacing:.02em;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding-bottom:2px;border-bottom:2px solid transparent}
+.game .gt.hasball .nm{border-bottom-color:var(--bulb)}
+.game.rz .gt.hasball .nm{border-bottom-color:var(--redzone)}
+.game .gt .sc{font-family:"Bebas Neue",sans-serif;font-size:32px;line-height:1;margin-top:1px}
+.game .st{font-size:10.5px;color:var(--chalk-dim);margin-top:7px;display:flex;justify-content:space-between;gap:8px}
+.game.rz .st{color:var(--redzone)}
 .game .x{position:absolute;top:3px;right:5px;color:var(--chalk-dim);font-size:14px;line-height:1;opacity:0;transition:opacity .12s}
 .game:hover .x,.game:focus-within .x{opacity:1}
 .picker{display:flex;gap:6px;margin-bottom:10px}
@@ -215,19 +220,17 @@ label{display:block;font-size:10px;color:var(--chalk-dim);margin:6px 0 3px}
 .money .stake{font-family:"Bebas Neue",sans-serif;font-size:42px;line-height:.82;color:var(--chalk)}
 .ticket.top .money .stake{color:var(--bulb)}
 .money .towin{font-size:11px;color:var(--chalk-dim)}
+/* live hit-tracker bar: red = hasn't hit yet, green = it has. Pending (game not live) stays neutral. */
 .segbar{display:flex;gap:3px;height:8px}
 .segbar i{flex:1;border-radius:2px;background:#0A0F0C;border:1px solid var(--line)}
-.segbar i.won,.segbar i.push{background:var(--cool);border-color:var(--cool)}
-.segbar i.ahead{background:var(--bulb);border-color:var(--bulb)}
-.segbar i.behind{background:#2A3B32;border-color:#2A3B32}
-.segbar i.lost{background:var(--redzone);border-color:var(--redzone)}
+.segbar i.won,.segbar i.push,.segbar i.ahead{background:var(--green);border-color:var(--green)}
+.segbar i.behind,.segbar i.lost,.segbar i.even{background:var(--redzone);border-color:var(--redzone)}
 .legs{display:flex;flex-direction:column}
 .leg{display:grid;grid-template-columns:9px 1fr auto;gap:9px;align-items:start;padding:6px 0;border-bottom:1px dashed var(--line)}
 .leg:last-child{border-bottom:none;padding-bottom:0}
 .leg .pip{width:8px;height:8px;border-radius:50%;margin-top:4px;background:#2A3B32}
-.leg .pip.won,.leg .pip.push{background:var(--cool)}
-.leg .pip.ahead{background:var(--bulb)}
-.leg .pip.lost{background:var(--redzone)}
+.leg .pip.won,.leg .pip.push,.leg .pip.ahead{background:var(--green)}
+.leg .pip.behind,.leg .pip.lost,.leg .pip.even{background:var(--redzone)}
 .leg .l1{font-size:12px}
 .leg .l2{font-size:10px;color:var(--chalk-dim)}
 .leg .adj{display:flex;gap:3px;align-items:center}
@@ -518,9 +521,9 @@ async function loadNFL(){
       detail: tp.shortDetail||tp.detail||"",
       clock: st.displayClock||"",
       period: num(st.period,0),
-      home:{ab:norm(home.team?.abbreviation), score:num(parseFloat(home.score))},
-      away:{ab:norm(away.team?.abbreviation), score:num(parseFloat(away.score))},
-      posAb: null, ytg:null, rz:false, dd:""
+      home:{ab:norm(home.team?.abbreviation), score:num(parseFloat(home.score)), name:home.team?.displayName||home.team?.name||norm(home.team?.abbreviation)},
+      away:{ab:norm(away.team?.abbreviation), score:num(parseFloat(away.score)), name:away.team?.displayName||away.team?.name||norm(away.team?.abbreviation)},
+      posAb: null, ytg:null, rz:false, dd:"", posText:""
     };
     if(sit){
       const pid = sit.possession;
@@ -530,6 +533,7 @@ async function loadNFL(){
       }
       g.rz = !!sit.isRedZone;
       g.dd = sit.downDistanceText || sit.shortDownDistanceText || "";
+      g.posText = sit.possessionText || "";
       g.ytg = yardsToGoal(sit, g.posAb);
     }
     games.push(g);
@@ -566,6 +570,14 @@ function remaining(teamAb){
   return Math.max(0, Math.min(1, (qLeft*900 + secs)/3600));
 }
 const gameOf = ab => (S.nfl.byTeam[norm(ab)]||{}).game || null;
+/* "BUF vs MIA" (home) or "BUF @ MIA" (away) for the line under a player's name */
+function matchupText(p){
+  const g = p._game, team = p.team || "—";
+  if(!g) return team;
+  const isHome = norm(team)===g.home.ab;
+  const opp = isHome ? g.away.ab : g.home.ab;
+  return team + (isHome ? " vs " : " @ ") + opp;
+}
 const hasBall = ab => { const g = gameOf(ab); return !!(g && g.state==="in" && g.posAb===norm(ab)); };
 
 /* ============================ league adapters ============================ */
@@ -708,17 +720,35 @@ function verdict(L){
 
 /* ============================ parlays ============================ */
 const PROP_STATS = [
-  {id:"passYds", label:"passing yards",   src:[["passing","passingYards"]],                     step:5,   def:225.5},
-  {id:"passTd",  label:"passing TDs",     src:[["passing","passingTouchdowns"]],                step:0.5, def:1.5},
-  {id:"cmp",     label:"completions",     src:[["passing","completions/passingAttempts",0]],    step:0.5, def:20.5},
-  {id:"patt",    label:"pass attempts",   src:[["passing","completions/passingAttempts",1]],    step:0.5, def:32.5},
-  {id:"ints",    label:"interceptions",   src:[["passing","interceptions"]],                    step:0.5, def:0.5},
-  {id:"rushYds", label:"rushing yards",   src:[["rushing","rushingYards"]],                     step:5,   def:55.5},
-  {id:"carries", label:"carries",         src:[["rushing","rushingAttempts"]],                  step:0.5, def:14.5},
-  {id:"rec",     label:"receptions",      src:[["receiving","receptions"]],                     step:0.5, def:4.5},
-  {id:"recYds",  label:"receiving yards", src:[["receiving","receivingYards"]],                 step:5,   def:55.5},
-  {id:"scrim",   label:"rush + rec yards",src:[["rushing","rushingYards"],["receiving","receivingYards"]], step:5, def:85.5},
-  {id:"anytd",   label:"TDs",             src:[["rushing","rushingTouchdowns"],["receiving","receivingTouchdowns"]], step:0.5, def:0.5}
+  // passing
+  {id:"passYds", label:"passing yards",    src:[["passing","passingYards"]],                     step:5,   def:225.5},
+  {id:"passTd",  label:"passing TDs",      src:[["passing","passingTouchdowns"]],                step:0.5, def:1.5},
+  {id:"cmp",     label:"completions",      src:[["passing","completions/passingAttempts",0]],    step:0.5, def:20.5},
+  {id:"patt",    label:"pass attempts",    src:[["passing","completions/passingAttempts",1]],    step:0.5, def:32.5},
+  {id:"ints",    label:"interceptions thrown", src:[["passing","interceptions"]],                step:0.5, def:0.5},
+  {id:"qbYds",   label:"pass + rush yards",src:[["passing","passingYards"],["rushing","rushingYards"]], step:5, def:255.5},
+  // rushing
+  {id:"rushYds", label:"rushing yards",    src:[["rushing","rushingYards"]],                     step:5,   def:55.5},
+  {id:"rushTd",  label:"rushing TDs",      src:[["rushing","rushingTouchdowns"]],                step:0.5, def:0.5},
+  {id:"carries", label:"carries",          src:[["rushing","rushingAttempts"]],                  step:0.5, def:14.5},
+  {id:"longRush",label:"longest rush",     src:[["rushing","longRushing"]],                      step:1,   def:14.5},
+  // receiving
+  {id:"rec",     label:"receptions",       src:[["receiving","receptions"]],                     step:0.5, def:4.5},
+  {id:"recYds",  label:"receiving yards",  src:[["receiving","receivingYards"]],                 step:5,   def:55.5},
+  {id:"recTd",   label:"receiving TDs",    src:[["receiving","receivingTouchdowns"]],            step:0.5, def:0.5},
+  {id:"longRec", label:"longest reception",src:[["receiving","longReception"]],                  step:1,   def:19.5},
+  {id:"scrim",   label:"rush + rec yards", src:[["rushing","rushingYards"],["receiving","receivingYards"]], step:5, def:85.5},
+  {id:"anytd",   label:"anytime TD",       src:[["rushing","rushingTouchdowns"],["receiving","receivingTouchdowns"]], step:0.5, def:0.5},
+  // kicking
+  {id:"fgm",     label:"field goals made", src:[["kicking","fieldGoalsMade/fieldGoalAttempts",0]], step:0.5, def:1.5},
+  {id:"xpm",     label:"extra points made",src:[["kicking","extraPointsMade/extraPointAttempts",0]], step:0.5, def:2.5},
+  {id:"kickPts", label:"kicking points",   src:[["kicking","totalKickingPoints"]],               step:0.5, def:7.5},
+  // defense / D-ST
+  {id:"sacks",   label:"sacks",            src:[["defensive","sacks"]],                          step:0.5, def:1.5},
+  {id:"tackles", label:"total tackles",    src:[["defensive","totalTackles"]],                   step:0.5, def:5.5},
+  {id:"tfl",     label:"tackles for loss", src:[["defensive","tacklesForLoss"]],                 step:0.5, def:0.5},
+  {id:"passDef", label:"passes defended",  src:[["defensive","passesDefended"]],                 step:0.5, def:0.5},
+  {id:"defInt",  label:"interceptions (defense)", src:[["interceptions","interceptions"]],       step:0.5, def:0.5}
 ];
 const statDef = id => PROP_STATS.find(x=>x.id===id) || PROP_STATS[0];
 const nameKey = s => String(s||"").toLowerCase().replace(/[^a-z ]/g," ").replace(/\s+/g," ").trim();
@@ -1032,13 +1062,16 @@ function renderGames(){
   const pinned = CFG.pinned.map(id=>S.nfl.games.find(g=>g.id===id)).filter(Boolean);
   if(!pinned.length){ host.innerHTML = '<div class="hint">Nothing pinned. Add the games you have action on and they live here.</div>'; return; }
   host.innerHTML = pinned.map(g=>{
-    const ball = g.posAb ? (g.posAb + (g.ytg!=null ? " · " + g.ytg + " to go" : "")) : "";
+    const sitLine = g.state==="in"
+      ? [g.dd, g.posText].filter(Boolean).map(esc).join(" · ") || esc(g.detail)
+      : esc(g.detail);
     return '<div class="game'+(g.rz?" rz":"")+'">'+
       '<button class="x" data-unpin="'+g.id+'" aria-label="Remove game">×</button>'+
-      '<div class="g"><span>'+g.away.ab+'</span><b>'+g.away.score+'</b></div>'+
-      '<div class="g"><span>'+g.home.ab+'</span><b>'+g.home.score+'</b></div>'+
-      '<div class="st"><span>'+esc(g.detail)+'</span><span class="ball">'+esc(ball)+'</span></div>'+
-      (g.dd ? '<div class="st"><span>'+esc(g.dd)+'</span></div>' : '')+
+      '<div class="gm">'+
+        '<div class="gt'+(g.posAb && g.posAb===g.away.ab?" hasball":"")+'"><div class="nm">'+esc(g.away.name)+'</div><div class="sc">'+g.away.score+'</div></div>'+
+        '<div class="gt home'+(g.posAb && g.posAb===g.home.ab?" hasball":"")+'"><div class="nm">'+esc(g.home.name)+'</div><div class="sc">'+g.home.score+'</div></div>'+
+      '</div>'+
+      '<div class="st"><span>'+sitLine+'</span></div>'+
     '</div>';
   }).join("");
 }
@@ -1063,7 +1096,7 @@ function renderNeeds(){
     const rowsFor = players => orderPlayers(players||[], qbSlots).map(p=>{
       const cls = p._state || "pre";
       const sl = statLine(p.pos, p.raw);
-      const subBits = [p.team||"—"];
+      const subBits = [matchupText(p)];
       if(sl) subBits.push(sl);
       else if(cls==="live" && p._game) subBits.push(esc(p._game.detail));
       let val;
