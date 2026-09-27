@@ -1833,9 +1833,12 @@ function liveLeague(L){
     L.cats.forEach(c=>{ if(LIVE_ADD[c]) T.live[c] = T.st[c] + LIVE_ADD[c](today); });
     const pa = T.pa + b.ab + b.bb + b.hbp + b.sf, ob = T.ob + b.h + b.bb + b.hbp;
     const outs = T.outs + y.outs;
-    if(L.cats.indexOf("OBP")>=0 && (b.ab||b.bb||b.hbp)) T.live.OBP = ob/pa;
-    if(L.cats.indexOf("ERA")>=0 && y.outs) T.live.ERA = (T.er + y.er)*27/outs;
-    if(L.cats.indexOf("WHIP")>=0 && y.outs) T.live.WHIP = (T.runs + y.h + y.bb)*3/outs;
+    if(L.cats.indexOf("OBP")>=0) T.live.OBP = ob/pa;
+    if(L.cats.indexOf("ERA")>=0 && outs) T.live.ERA = (T.er + y.er)*27/outs;
+    if(L.cats.indexOf("WHIP")>=0 && outs) T.live.WHIP = (T.runs + y.h + y.bb)*3/outs;
+    /* how precisely we know each ratio: OBP leans on CBS's 3-decimal rounding (HBP/SF aren't in the paste);
+       ERA/WHIP are exact when the team's season totals were pasted */
+    T.tol = {OBP:0.0005, ERA: T.est ? 0.005 : 0, WHIP: T.est ? 0.0005 : 0};
     T.cur = {pa, ob, outs, er: T.er + y.er, runs: T.runs + y.h + y.bb};
   });
   rotoPts(L.teams, L.cats, "st"); rotoPts(L.teams, L.cats, "live");
@@ -1892,16 +1895,22 @@ const RACE_SCALE = {HR:3, R:8, RBI:8, SB:3, H:8, K:14, W:1.5, SV:2};
 function raceItem(L, T, c, dir){
   const lower = LOWER_BETTER.has(c), v = T.live[c];
   let R = null;
-  L.teams.forEach(o=>{ if(o===T) return; const w = o.live[c];
+  const isRatio = c==="OBP" || c==="ERA" || c==="WHIP";
+  const tolOf = o => isRatio ? Math.max((T.tol||{})[c]||0, (o.tol||{})[c]||0) : 0;
+  const fuzzy = [];
+  L.teams.forEach(o=>{ if(o===T) return; const w = o.live[c], tol = tolOf(o);
+    if(isRatio && tol && Math.abs(w-v)<=tol){ fuzzy.push(o); return; }   // can't tell who's ahead at CBS precision
     const ok = dir==="up" ? (lower ? w<=v : w>=v) : (lower ? w>=v : w<=v);
-    if(ok && (Math.abs(w-v)>1e-12 || true) && (!R || Math.abs(w-v)<Math.abs(R.live[c]-v))) R = o; });
-  if(!R) return {c, dir, none:true, text: dir==="up" ? "you lead the league in "+c : "nobody behind you in "+c, ratio:99};
+    if(isRatio && Math.abs(w-v)<1e-12) return;
+    if(ok && (!R || Math.abs(w-v)<Math.abs(R.live[c]-v))) R = o; });
+  const fz = fuzzy.length ? " · dead even with "+fuzzy.map(o=>o.name).join(", ")+" at CBS's 3 decimals — order unknown" : "";
+  if(!R) return {c, dir, none:true, text: (dir==="up" ? "nobody clearly ahead of you in "+c : "nobody clearly behind you in "+c)+fz, ratio:99};
   const t = R.live[c], cur = T.cur || {}, eps = 1e-9;
   const tie = Math.abs(t-v)<1e-12;
   let n, text, ratio;
   if(c==="OBP"){
     if(dir==="up"){ n = Math.max(1, Math.floor((t*cur.pa - cur.ob)/(1-t) + eps) + 1); text = "+"+n+" baserunner"+(n>1?"s":"")+" in a row to pass "+R.name; ratio = n/6; }
-    else { n = Math.max(1, Math.floor(cur.ob/t - cur.pa + eps) + 1); text = (n>1 ? n+" straight outs" : "1 out")+" at the plate and "+R.name+" passes you"+(Math.abs(t-v)<0.0015 ? " (CBS shows you tied — rounding)" : ""); ratio = n/25; }
+    else { n = Math.max(1, Math.floor(cur.ob/t - cur.pa + eps) + 1); text = (n>1 ? n+" straight outs" : "1 out")+" at the plate and "+R.name+" passes you"; ratio = n/25; }
   } else if(c==="WHIP"){
     if(dir==="down"){ n = Math.max(1, Math.floor(t*cur.outs/3 - cur.runs + eps) + 1); text = n+" baserunner"+(n>1?"s":"")+" allowed (no outs) and "+R.name+" passes you"; ratio = n/8; }
     else { n = Math.max(1, Math.floor(cur.runs*3/t - cur.outs + eps) + 1); text = n+" straight outs, nobody on ("+ipTxt(n)+" IP) to pass "+R.name; ratio = n/27; }
@@ -1913,7 +1922,9 @@ function raceItem(L, T, c, dir){
     text = dir==="up" ? "+"+n+" "+c+" to pass "+R.name+(n>1 ? " ("+(n-1)+" to tie)" : "") : R.name+" needs +"+n+" "+c+" to pass you"+(tie ? " (tied now)" : "");
     ratio = n/(RACE_SCALE[c]||5);
   }
-  return {c, dir, R, n, text, ratio, sub: esc(R.name)+" "+catFmt(c,t)+" · you "+catFmt(c,v)};
+  const dec = c==="OBP" ? 4 : (c==="WHIP" ? 4 : (c==="ERA" ? 3 : null));
+  const fmt = x => dec ? x.toFixed(dec).replace(/^0/,"") : catFmt(c,x);
+  return {c, dir, R, n, text, ratio, sub: esc(R.name)+" "+fmt(t)+" · you "+fmt(v)+esc(fz)};
 }
 function raceCard(L, T, view){
   if(!L || !T || !T.cur) return "";
@@ -1932,6 +1943,7 @@ function raceCard(L, T, view){
     sec("Watch list", focus, "—")+
     sec(plan.extraUp ? "Closest to taking" : "", ups, "nothing realistic left to take")+
     sec("Closest to losing", downs, "nothing in danger")+
+    '<div class="rs" style="margin-top:6px">Counts assume the other team stands still. OBP to 4 decimals is estimated (CBS doesn\'t give HBP/SF); WHIP and ERA are exact from season totals.</div>'+
     '</div>';
 }
 function ownTag(L, T, id){
