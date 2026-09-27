@@ -450,7 +450,7 @@ body.norail .rail{display:none}
 <div><label for="mlbLeague">League</label><input id="mlbLeague" placeholder="Dixon Entrance Baseball"></div>
 <div><label for="mlbTeam">My team name, as it reads in the standings</label><input id="mlbTeam" placeholder="Dennis"></div>
 </div>
-<label for="mlbPaste">Whole-league paste — CBS standings plus every team's active roster and totals</label>
+<label for="mlbPaste">Whole-league paste — CBS standings, every team's actives and totals, plus the Batting/Pitching Breakdown from Standings › Overall (for 4-decimal OBP/WHIP)</label>
 <textarea id="mlbPaste" rows="6" placeholder="Rank&#10;Team&#10;HR …&#10;1st&#10;RainDawgs …&#10;&#10;Dennis&#10;Actives …"></textarea>
 <div class="grid2">
 <div><label for="mlbViews">Switch teams (top of the board)</label><input id="mlbViews" placeholder="Dennis, WTFC"></div>
@@ -1449,6 +1449,18 @@ function parseLeaguePaste(txt){
     i += 2 + cols.length;
   }
   const L0 = i<cells.length ? cells[i].li : lines.length;
+  /* CBS "Batting/Pitching Breakdown" blocks carry OBP/WHIP to 4 decimals and ERA to 3 — use them when pasted */
+  const bd = {};
+  let bcat = null;
+  lines.forEach(l=>{
+    const t = l.trim();
+    const h = t.match(/^TEAM\s+([A-Z]+)\s+PTS\s+DIF$/i);
+    if(h){ const u = h[1].toUpperCase(); bcat = CAT_ALIAS[u] || u; bd[bcat] = bd[bcat] || {}; return; }
+    if(/breakdown|^standings updated/i.test(t)){ bcat = null; return; }
+    if(!bcat) return;
+    const m = t.match(/^(.+?)\s+(-?[\d.]+)\s+(-?[\d.]+)\s+(-?[\d.]+)$/);
+    if(m) bd[bcat][m[1].trim()] = parseFloat(m[2]); else if(t) bcat = null;
+  });
   const POSRE = /^([A-Z]\.\s?[A-Za-z'\.\- ]+?)\s+(C|1B|2B|3B|SS|MI|CI|OF|U|UT|DH|P|SP|RP)\s*\*?\s*$/;
   const blocks = [];
   let cur = null, inTot = false;
@@ -1503,6 +1515,16 @@ function parseLeaguePaste(txt){
   });
   const leftB = blocks.filter(b=>!b.done && b.roster.length), leftT = out.teams.filter(x=>!used.has(x));
   if(leftB.length===1 && leftT.length===1) assign(leftB[0], leftT[0]);
+  /* precise breakdown values: pair CBS's full team names to the standings rows by HR (unique), then R */
+  if(bd.HR){
+    Object.keys(bd.HR).forEach(nm=>{
+      let T = out.teams.filter(x=>x.st.HR===bd.HR[nm]);
+      if(T.length!==1 && bd.R) T = T.filter(x=>x.st.R===bd.R[nm]);
+      if(T.length!==1) return;
+      T = T[0]; T.cbsName = nm; T.precise = true;
+      Object.keys(bd).forEach(c=>{ if(bd[c][nm]!=null && out.cats.indexOf(c)>=0) T.st[c] = bd[c][nm]; });
+    });
+  }
   /* season denominators so OBP / ERA / WHIP can move live */
   out.teams.forEach(T=>{
     const s = T.st, t = T.tot || {};
@@ -1838,7 +1860,8 @@ function liveLeague(L){
     if(L.cats.indexOf("WHIP")>=0 && outs) T.live.WHIP = (T.runs + y.h + y.bb)*3/outs;
     /* how precisely we know each ratio: OBP leans on CBS's 3-decimal rounding (HBP/SF aren't in the paste);
        ERA/WHIP are exact when the team's season totals were pasted */
-    T.tol = {OBP:0.0005, ERA: T.est ? 0.005 : 0, WHIP: T.est ? 0.0005 : 0};
+    T.tol = T.precise ? {OBP:0.00005, ERA: T.est ? 0.0005 : 0, WHIP: T.est ? 0.00005 : 0}
+                      : {OBP:0.0005, ERA: T.est ? 0.005 : 0, WHIP: T.est ? 0.0005 : 0};
     T.cur = {pa, ob, outs, er: T.er + y.er, runs: T.runs + y.h + y.bb};
   });
   rotoPts(L.teams, L.cats, "st"); rotoPts(L.teams, L.cats, "live");
@@ -1903,7 +1926,7 @@ function raceItem(L, T, c, dir){
     const ok = dir==="up" ? (lower ? w<=v : w>=v) : (lower ? w>=v : w<=v);
     if(isRatio && Math.abs(w-v)<1e-12) return;
     if(ok && (!R || Math.abs(w-v)<Math.abs(R.live[c]-v))) R = o; });
-  const fz = fuzzy.length ? " · dead even with "+fuzzy.map(o=>o.name).join(", ")+" at CBS's 3 decimals — order unknown" : "";
+  const fz = fuzzy.length ? " · dead even with "+fuzzy.map(o=>o.name).join(", ")+" at CBS's precision — order unknown" : "";
   if(!R) return {c, dir, none:true, text: (dir==="up" ? "nobody clearly ahead of you in "+c : "nobody clearly behind you in "+c)+fz, ratio:99};
   const t = R.live[c], cur = T.cur || {}, eps = 1e-9;
   const tie = Math.abs(t-v)<1e-12;
@@ -1943,7 +1966,7 @@ function raceCard(L, T, view){
     sec("Watch list", focus, "—")+
     sec(plan.extraUp ? "Closest to taking" : "", ups, "nothing realistic left to take")+
     sec("Closest to losing", downs, "nothing in danger")+
-    '<div class="rs" style="margin-top:6px">Counts assume the other team stands still. OBP to 4 decimals is estimated (CBS doesn\'t give HBP/SF); WHIP and ERA are exact from season totals.</div>'+
+    '<div class="rs" style="margin-top:6px">Counts assume the other team stands still. Season values come from the CBS standings breakdown (OBP/WHIP to 4 decimals); today\'s games are added live on top.</div>'+
     '</div>';
 }
 function ownTag(L, T, id){
