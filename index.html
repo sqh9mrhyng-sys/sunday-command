@@ -372,6 +372,21 @@ label{display:block;font-size:10px;color:var(--chalk-dim);margin:6px 0 3px}
 .bxt tr.sub td:first-child{padding-left:12px}
 .bxsec{font-family:"Bebas Neue",sans-serif;font-size:15px;letter-spacing:.04em;color:var(--chalk-dim);margin:12px 0 4px}
 .lsc td,.lsc th{text-align:center!important;min-width:20px}
+.racecard{grid-column:span 2;border-left-color:var(--bulb);gap:4px}
+@media (max-width:620px){.racecard{grid-column:auto}}
+.racecard .ch{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+.racecard .ch b{color:var(--bulb);font-family:"Bebas Neue",sans-serif;font-size:17px;font-weight:400;letter-spacing:.04em}
+.racecard .ch span{font-size:10px;color:var(--chalk-dim)}
+.gboard{align-items:start}
+.rhead{font-family:"Bebas Neue",sans-serif;font-size:13px;letter-spacing:.06em;color:var(--chalk-dim);margin-top:6px;border-bottom:1px solid var(--line)}
+.race{display:grid;grid-template-columns:62px 1fr;gap:8px;padding:4px 0;border-bottom:1px dashed var(--line)}
+.race .rc{font-family:"Bebas Neue",sans-serif;font-size:18px;line-height:1}
+.race .rc i{display:block;font-style:normal;font-family:"DM Mono",monospace;font-size:9px}
+.race.up .rc i{color:var(--green)}
+.race.dn .rc i{color:var(--redzone)}
+.race .rt{font-size:11.5px}
+.race .rs{font-size:10px;color:var(--chalk-dim)}
+.rs{font-size:10px;color:var(--chalk-dim)}
 
 body.norail .shell{grid-template-columns:1fr}
 body.norail .rail{display:none}
@@ -1821,6 +1836,7 @@ function liveLeague(L){
     if(L.cats.indexOf("OBP")>=0 && (b.ab||b.bb||b.hbp)) T.live.OBP = ob/pa;
     if(L.cats.indexOf("ERA")>=0 && y.outs) T.live.ERA = (T.er + y.er)*27/outs;
     if(L.cats.indexOf("WHIP")>=0 && y.outs) T.live.WHIP = (T.runs + y.h + y.bb)*3/outs;
+    T.cur = {pa, ob, outs, er: T.er + y.er, runs: T.runs + y.h + y.bb};
   });
   rotoPts(L.teams, L.cats, "st"); rotoPts(L.teams, L.cats, "live");
 }
@@ -1855,9 +1871,69 @@ function needFor(L, T, bat, pit, runners){
     else if(contested(L, T, ro, ["R"]).length){ out += 1; why.push(shortNm(r.fullName)+" ("+ro.name+") on base — "+gapWords(T,ro,"R")); }
   });
   const v = hit>out ? "hit" : (out>hit ? "out" : (hit ? "split" : "none"));
+  if(v==="none"){
+    why.length = 0;
+    const inv = [];
+    if(bo) inv.push(shortNm(bat.fullName)+" ("+bo.name+")");
+    if(po) inv.push(shortNm(pit.fullName)+" ("+po.name+")");
+    (runners||[]).forEach(r=>{ const ro = MB.own.get(r.id); if(ro) inv.push(shortNm(r.fullName)+" ("+ro.name+")"); });
+    why.push(inv.length ? "Nothing here can move you — "+inv.join(", ")+(inv.length>1?" are":" is")+" on a team out of reach of you."
+                        : "Nothing here can move you — nobody involved is on a fantasy roster.");
+  }
   return {v, why, hit, out};
 }
-const NEED_TXT = {hit:"NEED A HIT", out:"NEED AN OUT", split:"PULLED BOTH WAYS", none:"NO STAKE"};
+const NEED_TXT = {hit:"NEED A HIT", out:"NEED AN OUT", split:"PULLED BOTH WAYS", none:"IRRELEVANT AB"};
+/* ---------- the races: how far from taking / losing each category spot ---------- */
+const RACE_PLAN = {
+  dennis: {focus:[["OBP","up"],["WHIP","down"]], extraUp:2, extraDown:2, upMax:1.5, downMax:99},
+  wtfc:   {focus:[["ERA","up"],["ERA","down"],["OBP","up"],["OBP","down"],["R","up"],["R","down"]], extraUp:3, extraDown:3, upMax:1, downMax:1}
+};
+const RACE_SCALE = {HR:3, R:8, RBI:8, SB:3, H:8, K:14, W:1.5, SV:2};
+function raceItem(L, T, c, dir){
+  const lower = LOWER_BETTER.has(c), v = T.live[c];
+  let R = null;
+  L.teams.forEach(o=>{ if(o===T) return; const w = o.live[c];
+    const ok = dir==="up" ? (lower ? w<=v : w>=v) : (lower ? w>=v : w<=v);
+    if(ok && (Math.abs(w-v)>1e-12 || true) && (!R || Math.abs(w-v)<Math.abs(R.live[c]-v))) R = o; });
+  if(!R) return {c, dir, none:true, text: dir==="up" ? "you lead the league in "+c : "nobody behind you in "+c, ratio:99};
+  const t = R.live[c], cur = T.cur || {}, eps = 1e-9;
+  const tie = Math.abs(t-v)<1e-12;
+  let n, text, ratio;
+  if(c==="OBP"){
+    if(dir==="up"){ n = Math.max(1, Math.floor((t*cur.pa - cur.ob)/(1-t) + eps) + 1); text = "+"+n+" baserunner"+(n>1?"s":"")+" in a row to pass "+R.name; ratio = n/6; }
+    else { n = Math.max(1, Math.floor(cur.ob/t - cur.pa + eps) + 1); text = (n>1 ? n+" straight outs" : "1 out")+" at the plate and "+R.name+" passes you"+(Math.abs(t-v)<0.0015 ? " (CBS shows you tied — rounding)" : ""); ratio = n/25; }
+  } else if(c==="WHIP"){
+    if(dir==="down"){ n = Math.max(1, Math.floor(t*cur.outs/3 - cur.runs + eps) + 1); text = n+" baserunner"+(n>1?"s":"")+" allowed (no outs) and "+R.name+" passes you"; ratio = n/8; }
+    else { n = Math.max(1, Math.floor(cur.runs*3/t - cur.outs + eps) + 1); text = n+" straight outs, nobody on ("+ipTxt(n)+" IP) to pass "+R.name; ratio = n/27; }
+  } else if(c==="ERA"){
+    if(dir==="down"){ n = Math.max(1, Math.floor(t*cur.outs/27 - cur.er + eps) + 1); text = n+" earned run"+(n>1?"s":"")+" (no outs) and "+R.name+" passes you"; ratio = n/4; }
+    else { n = Math.max(1, Math.floor(cur.er*27/t - cur.outs + eps) + 1); text = ipTxt(n)+" scoreless IP to pass "+R.name; ratio = n/27; }
+  } else {
+    n = Math.round(Math.abs(t-v)) + 1;
+    text = dir==="up" ? "+"+n+" "+c+" to pass "+R.name+(n>1 ? " ("+(n-1)+" to tie)" : "") : R.name+" needs +"+n+" "+c+" to pass you"+(tie ? " (tied now)" : "");
+    ratio = n/(RACE_SCALE[c]||5);
+  }
+  return {c, dir, R, n, text, ratio, sub: esc(R.name)+" "+catFmt(c,t)+" · you "+catFmt(c,v)};
+}
+function raceCard(L, T, view){
+  if(!L || !T || !T.cur) return "";
+  const plan = RACE_PLAN[tKey(view)] || {focus:[], extraUp:2, extraDown:2, upMax:1.5, downMax:99};
+  const focus = plan.focus.filter(f=>L.cats.indexOf(f[0])>=0).map(f=>raceItem(L, T, f[0], f[1]));
+  const used = new Set(plan.focus.map(f=>f[0]));
+  const rest = L.cats.filter(c=>!used.has(c));
+  const ups = rest.map(c=>raceItem(L,T,c,"up")).filter(x=>!x.none && x.ratio<=plan.upMax).sort((a,b)=>a.ratio-b.ratio).slice(0, plan.extraUp);
+  const downs = rest.map(c=>raceItem(L,T,c,"down")).filter(x=>!x.none && x.ratio<=plan.downMax).sort((a,b)=>a.ratio-b.ratio).slice(0, plan.extraDown);
+  const feel = r => r<=0.5 ? "very live" : (r<=1 ? "realistic" : (r<=1.5 ? "reach" : "long shot"));
+  const row = x => '<div class="race '+(x.dir==="up"?"up":"dn")+'"><div class="rc">'+x.c+'<i>'+(x.dir==="up"?"▲ take":"▼ lose")+'</i></div>'+
+    '<div><div class="rt">'+esc(x.text)+'</div>'+(x.none ? "" : '<div class="rs">'+x.sub+' · '+feel(x.ratio)+'</div>')+'</div></div>';
+  const sec = (t, arr, empty) => '<div class="rhead">'+t+'</div>'+(arr.length ? arr.map(row).join("") : '<div class="rs" style="padding:4px 0">'+empty+'</div>');
+  return '<div class="gcard racecard" style="cursor:default">'+
+    '<div class="ch" style="margin:0"><b>'+esc(T.name)+' — the races</b><span>'+ptsFmt(T.liveT)+' pts live</span></div>'+
+    sec("Watch list", focus, "—")+
+    sec(plan.extraUp ? "Closest to taking" : "", ups, "nothing realistic left to take")+
+    sec("Closest to losing", downs, "nothing in danger")+
+    '</div>';
+}
 function ownTag(L, T, id){
   const o = MB.own.get(id); if(!o) return "";
   const hot = o!==T && (contested(L,T,o,HIT_CATS).length || contested(L,T,o,PIT_CATS).length);
@@ -2014,7 +2090,7 @@ function renderDiamond(){
   if(ag.length){
     const ord = g => ({Live:0, Preview:1, Final:2})[g.status.abstractGameState] ?? 1;
     const list = ag.slice().sort((x,y)=>ord(x)-ord(y) || new Date(x.gameDate)-new Date(y.gameDate));
-    boardHtml = '<div class="gboard" style="grid-column:1/-1">'+list.map(g=>gameCard(g, L, T)).join("")+'</div>';
+    boardHtml = '<div class="gboard" style="grid-column:1/-1">'+list.map(g=>gameCard(g, L, T)).join("")+raceCard(L, T, view)+'</div>';
   }
 
   /* ----- standings ----- */
