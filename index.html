@@ -270,6 +270,108 @@ label{display:block;font-size:10px;color:var(--chalk-dim);margin:6px 0 3px}
   .pulse{animation:bl 2.4s ease-in-out infinite}
   @keyframes bl{0%,100%{opacity:1}50%{opacity:.25}}
 }
+
+/* ---------- diamond (fantasy baseball) ---------- */
+.dia{display:grid;gap:var(--pad);grid-template-columns:minmax(0,1.25fr) minmax(0,1fr)}
+@media (max-width:1100px){.dia{grid-template-columns:1fr}}
+.card{border:1px solid var(--line);border-radius:4px;background:var(--turf-2);padding:12px 13px;min-width:0}
+.card+.card{margin-top:var(--pad)}
+.card .ch{display:flex;justify-content:space-between;align-items:baseline;gap:8px;margin-bottom:8px}
+.card .ch b{font-family:"Bebas Neue",sans-serif;font-size:16px;font-weight:400;letter-spacing:.04em;color:var(--chalk-dim)}
+.card .ch span{font-size:10px;color:var(--chalk-dim)}
+.tscroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
+.roto{width:100%;border-collapse:collapse;font-size:11px;white-space:nowrap}
+.roto th{font-weight:400;color:var(--chalk-dim);font-size:9.5px;text-align:right;padding:3px 5px;border-bottom:1px solid var(--line)}
+.roto th:nth-child(2),.roto td:nth-child(2){text-align:left}
+.roto td{text-align:right;padding:4px 5px;border-bottom:1px dashed var(--line);vertical-align:top}
+.roto tr:last-child td{border-bottom:none}
+.roto td .rp{display:block;font-size:9px;color:var(--chalk-dim)}
+.roto tr.me td{color:var(--bulb)}
+.roto td.tot{font-family:"Bebas Neue",sans-serif;font-size:18px;line-height:1}
+.roto .up{color:var(--green)}
+.roto .dn{color:var(--redzone)}
+.gaps{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:6px;margin-top:10px}
+.gapc{border:1px solid var(--line);border-radius:3px;padding:6px 8px;font-size:10.5px;color:var(--chalk-dim)}
+.gapc b{display:flex;justify-content:space-between;font-family:"Bebas Neue",sans-serif;font-weight:400;font-size:15px;color:var(--chalk)}
+.gapc .g-up{color:var(--green)}
+.gapc .g-dn{color:var(--redzone)}
+.todaysum{font-size:11px;color:var(--chalk-dim);margin-bottom:8px;line-height:1.7}
+.todaysum b{color:var(--chalk);font-weight:500}
+.plist .pr{display:grid;grid-template-columns:1fr auto;gap:8px;padding:6px 0;border-bottom:1px dashed var(--line)}
+.plist .pr:last-child{border-bottom:none}
+.plist .nm{font-size:12px}
+.plist .sub{font-size:10px;color:var(--chalk-dim);margin-top:2px}
+.plist .ln{text-align:right;font-size:11px;white-space:nowrap}
+.plist .pr.live .nm,.plist .pr.live .ln{color:var(--purple)}
+.plist .pr.done .nm,.plist .pr.done .ln{color:var(--green)}
+.plist .pr.out .nm,.plist .pr.out .ln{color:var(--redzone)}
+.plist .pr.idle{opacity:.5}
+.plist .now{color:var(--bulb);font-size:9.5px;border:1px solid var(--bulb);border-radius:2px;padding:0 4px;margin-left:5px}
+.tag{font-size:9px;border:1px solid var(--line);border-radius:2px;padding:0 4px;margin-left:5px;color:var(--chalk-dim);font-family:"DM Mono",monospace}
+.chips{display:flex;gap:4px}
+.chips button{border:1px solid var(--line);border-radius:999px;padding:2px 9px;font-size:10px;color:var(--chalk-dim)}
+.chips button.on{border-color:var(--bulb);color:var(--bulb)}
+.feed{max-height:760px;overflow-y:auto}
+.ab{display:grid;grid-template-columns:38px 1fr;gap:8px;padding:6px 0;border-bottom:1px dashed var(--line)}
+.ab:last-child{border-bottom:none}
+.ab .inn{font-family:"Bebas Neue",sans-serif;font-size:16px;color:var(--chalk-dim);line-height:1.1}
+.ab .inn i{display:block;font-style:normal;font-family:"DM Mono",monospace;font-size:9px}
+.ab .who{font-size:12px}
+.ab .ev{font-family:"Bebas Neue",sans-serif;font-size:16px;letter-spacing:.03em;line-height:1.15}
+.ab .ds{font-size:10px;color:var(--chalk-dim);margin-top:1px}
+.ab.good .ev{color:var(--green)}
+.ab.bad .ev{color:var(--redzone)}
+.ab.big .ev{color:var(--bulb)}
+.ab.cur{background:rgba(185,140,255,.07)}
+.ab.cur .ev{color:var(--purple)}
+.miss{font-size:10px;color:var(--redzone);margin-top:8px}
+.viewsw{display:flex;gap:0;border:1px solid var(--line);border-radius:999px;overflow:hidden}
+.viewsw button{padding:5px 16px;font-family:"Bebas Neue",sans-serif;font-size:16px;letter-spacing:.05em;color:var(--chalk-dim)}
+.viewsw button.on{background:var(--bulb);color:#0B120E}
+.gboard{display:grid;gap:10px;grid-template-columns:repeat(auto-fill,minmax(265px,1fr));margin-bottom:var(--pad)}
+.gcard{border:1px solid var(--line);border-left:3px solid var(--line);border-radius:4px;background:var(--turf-2);padding:9px 10px;cursor:pointer;display:flex;flex-direction:column;gap:7px;min-width:0}
+.gcard:hover{border-color:var(--chalk-dim)}
+.gcard.n-out{border-left-color:var(--redzone)}
+.gcard.n-hit{border-left-color:var(--green)}
+.gcard.n-split{border-left-color:var(--bulb)}
+.gcard.pre,.gcard.fin{opacity:.72}
+.gsc{display:grid;grid-template-columns:1fr auto;gap:2px 8px;align-items:baseline}
+.gsc .tm{font-family:"Bebas Neue",sans-serif;font-size:17px;letter-spacing:.03em}
+.gsc .rn{font-family:"Bebas Neue",sans-serif;font-size:22px;line-height:1;text-align:right}
+.gsc .bat .tm::after{content:" ●";color:var(--bulb);font-size:9px;vertical-align:middle}
+.gst{display:flex;justify-content:space-between;align-items:center;font-size:10.5px;color:var(--chalk-dim)}
+.bases{position:relative;width:30px;height:22px;display:inline-block}
+.bases i{position:absolute;width:8px;height:8px;border:1px solid var(--chalk-dim);transform:rotate(45deg)}
+.bases i.on{background:var(--bulb);border-color:var(--bulb)}
+.bases .b2{left:11px;top:1px}.bases .b1{left:20px;top:10px}.bases .b3{left:2px;top:10px}
+.abnow{font-size:11.5px;line-height:1.5}
+.abnow .ct{color:var(--chalk-dim);font-size:10px}
+.own{font-size:9px;border-radius:2px;padding:0 4px;margin-left:4px;border:1px solid var(--line);color:var(--chalk-dim);white-space:nowrap}
+.own.me{border-color:var(--bulb);color:var(--bulb)}
+.own.hot{border-color:var(--redzone);color:var(--redzone)}
+.needb{font-family:"Bebas Neue",sans-serif;font-size:20px;letter-spacing:.05em;line-height:1}
+.needb.out{color:var(--redzone)}.needb.hit{color:var(--green)}.needb.split{color:var(--bulb)}.needb.none{color:var(--chalk-dim);font-size:15px}
+.why{font-size:10px;color:var(--chalk-dim);line-height:1.45}
+.gpit{border-top:1px dashed var(--line);padding-top:6px;font-size:10px;color:var(--chalk-dim);line-height:1.6}
+.gpit b{color:var(--chalk);font-weight:500}
+.gpit .lbl{display:inline-block;width:30px;color:var(--chalk-dim)}
+.bxveil{position:fixed;inset:0;background:rgba(4,8,6,.86);z-index:45;display:flex;justify-content:center;align-items:flex-start;padding:26px 14px;overflow:auto}
+.bxveil[hidden]{display:none}
+.bxpanel{width:min(1100px,100%);background:var(--turf-2);border:1px solid var(--line);border-radius:5px;padding:16px}
+.bxhead{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:10px}
+.bxhead h2{margin:0;font-size:28px}
+.bxhead button{border:1px solid var(--line);border-radius:3px;padding:5px 12px;font-size:11px}
+.bxgrid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media (max-width:820px){.bxgrid{grid-template-columns:1fr}}
+.bxt{width:100%;border-collapse:collapse;font-size:11px;white-space:nowrap}
+.bxt th{font-weight:400;color:var(--chalk-dim);font-size:9.5px;text-align:right;padding:3px 4px;border-bottom:1px solid var(--line)}
+.bxt th:first-child,.bxt td:first-child{text-align:left}
+.bxt td{text-align:right;padding:3px 4px;border-bottom:1px dashed var(--line)}
+.bxt tr.me td{color:var(--bulb)}
+.bxt tr.hot td:first-child{color:var(--redzone)}
+.bxt tr.sub td:first-child{padding-left:12px}
+.bxsec{font-family:"Bebas Neue",sans-serif;font-size:15px;letter-spacing:.04em;color:var(--chalk-dim);margin:12px 0 4px}
+.lsc td,.lsc th{text-align:center!important;min-width:20px}
 </style>
 </head>
 <body>
@@ -279,7 +381,8 @@ label{display:block;font-size:10px;color:var(--chalk-dim);margin:6px 0 3px}
   <span class="wk" id="wkLabel">—</span>
   <span class="spacer"></span>
   <span class="meta"><span class="pulse" id="pulse"></span><span id="stamp">starting up</span></span>
-  <button class="tool" id="openCfg">Leagues &amp; setup</button>
+  <button class="tool" id="goDia" style="border-color:var(--bulb);color:var(--bulb)">⚾ Baseball</button>
+<button class="tool" id="openCfg">Leagues &amp; setup</button>
 </div>
 
 <div class="shell">
@@ -288,7 +391,11 @@ label{display:block;font-size:10px;color:var(--chalk-dim);margin:6px 0 3px}
       <div class="head"><h2>My lineups</h2><span class="rule"></span><span class="note" id="needNote"></span></div>
       <div class="needs" id="needs"></div>
     </div>
-  </section>
+  <div id="diaWrap">
+<div class="head"><h2>Diamond</h2><span class="rule"></span><span class="note" id="mlbNote"></span></div>
+<div class="dia" id="dia"><div class="card"><div class="hint">Loading today's MLB board…</div></div></div>
+</div>
+</section>
 
   <aside class="rail">
     <div class="head"><h2>On the board</h2><span class="rule"></span></div>
@@ -317,7 +424,31 @@ label{display:block;font-size:10px;color:var(--chalk-dim);margin:6px 0 3px}
     </div>
     <div id="lgList"></div>
     <button class="addlg" id="addLg">+ Add a league</button>
-    <div class="grid2" style="margin-top:14px">
+    <div class="lgcard" id="mlbCard">
+<div class="top"><b class="bebas" style="font-size:17px;flex:1">Fantasy baseball — roto tracker</b>
+<label style="display:flex;gap:6px;align-items:center;margin:0"><input type="checkbox" id="mlbOn" style="width:auto"> show it</label></div>
+<div class="grid2">
+<div><label for="mlbLeague">League</label><input id="mlbLeague" placeholder="Dixon Entrance Baseball"></div>
+<div><label for="mlbTeam">My team name, as it reads in the standings</label><input id="mlbTeam" placeholder="Dennis"></div>
+</div>
+<label for="mlbPaste">Whole-league paste — CBS standings plus every team's active roster and totals</label>
+<textarea id="mlbPaste" rows="6" placeholder="Rank&#10;Team&#10;HR …&#10;1st&#10;RainDawgs …&#10;&#10;Dennis&#10;Actives …"></textarea>
+<div class="grid2">
+<div><label for="mlbViews">Switch teams (top of the board)</label><input id="mlbViews" placeholder="Dennis, WTFC"></div>
+<div></div>
+</div>
+<div class="hint">With the league paste in, every team's standings move live and each at-bat tells you whether you need a hit or an out. The two boxes below are only a fallback when there's no league paste.</div>
+<label for="mlbRoster">Active roster — one player per line</label>
+<textarea id="mlbRoster" rows="8" placeholder="Aaron Judge NYY&#10;Bobby Witt Jr. KC&#10;Josh Hader HOU&#10;bench&#10;Some Reserve TEX"></textarea>
+<div class="hint">Name plus team is safest; a straight copy of the CBS roster page works too. Anything under a line reading <code>bench</code>, <code>reserve</code> or <code>IL</code> is shown but not counted. Lines, at-bats and game states come live from MLB's public feed every 20 seconds.</div>
+<label for="mlbStand">Standings — paste the stats view (a header row lets it read any column order)</label>
+<textarea id="mlbStand" rows="7" placeholder="Team HR OBP R RBI SB ERA WHIP K W SV&#10;Dennis 231 .331 842 810 96 3.71 1.18 1301 88 61&#10;…one line per team"></textarea>
+<div class="grid2">
+<div><label for="mlbCats">Category order when the paste has no header</label><input id="mlbCats" placeholder="HR OBP R RBI SB ERA WHIP K W SV"></div>
+<div><label style="display:flex;gap:6px;align-items:center;margin-top:24px"><input type="checkbox" id="mlbAddLive" style="width:auto"> add today's live stats to my row</label></div>
+</div>
+</div>
+<div class="grid2" style="margin-top:14px">
       <div>
         <label for="wkIn">Week (blank = auto from the NFL feed)</label>
         <input id="wkIn" inputmode="numeric" placeholder="auto">
@@ -334,6 +465,7 @@ label{display:block;font-size:10px;color:var(--chalk-dim);margin:6px 0 3px}
   </div>
 </div>
 
+<div class="bxveil" id="bxveil" hidden><div class="bxpanel" id="bxpanel"></div></div>
 <button class="corner" id="newParlay">+ Parlay</button>
 
 <div class="veil" id="pveil" hidden>
@@ -376,6 +508,7 @@ const store = {
 
 const DEFAULT_CFG = {
   week:"", proxy:"", pinned:[], parlays:[],
+mlb:{on:true, league:"Dixon Entrance Baseball", team:"Dennis", roster:"", standings:"", cats:"HR OBP R RBI SB ERA WHIP K W SV", addLive:true, leaguePaste:"", views:"Dennis, WTFC"},
   leagues:[
     {id:"L1", name:"CBS",   platform:"cbs",   source:"paste", leagueId:"", teamId:"", feed:"", manual:""},
     {id:"L2", name:"ESPN",  platform:"espn",  source:"auto",  leagueId:"", teamId:"", feed:"", manual:""},
@@ -704,7 +837,7 @@ async function loadManual(L){
   const txt = (L.manual||"").trim();
   if(!txt) throw new Error("Paste your score line in setup to light this one up.");
   const out = {me:{name:"Me", score:0, players:[]}, op:{name:"Opponent", score:0, players:[]}};
-  let cur = "me";
+  if(looksRawCBS(txt)) parseRawCBS(txt, out, !!L.swap); else if(looksRawYahoo(txt)) parseRawYahoo(txt, out); else { let cur = "me";
   txt.split(/\n+/).forEach(raw=>{
     const line = raw.trim(); if(!line) return;
     let m = line.match(/^(me|opp|them|mine)\b[:\s]+(.*)$/i);
@@ -723,8 +856,178 @@ async function loadManual(L){
       out[cur].players.push({name:m[1].trim(), team:norm(m[2]), pos:"FLEX", proj:parseFloat(m[3]), pts:m[4]?parseFloat(m[4]):0});
     }
   });
-  await Promise.all([resolvePositions(out.me.players), resolvePositions(out.op.players)]);
+  }
+await Promise.all([resolvePositions(out.me.players), resolvePositions(out.op.players)]);
   return out;
+}
+
+/* ============================ paste leagues: raw CBS + live points ============================ */
+function looksRawCBS(txt){ return /^\s*(QB|RB|WR|TE|K|DST|DEF|FLEX|RB-WR-TE|W-R-T|W\/R\/T|OP|SF)\s*\|\s*[A-Za-z]{2,4}\b/m.test(txt); }
+function parseRawCBS(txt, out, swap){
+  const lines = txt.split(/\n/).map(l=>l.trim().replace(/^\[(.+?)\]\([^)]*\)$/,"$1").trim()).filter(Boolean);
+  const isNum = l => /^-?\d+(\.\d+)?$/.test(l);
+  const blocks = [[]], totals = [];
+  let meName = "", opName = "";
+  for(let i=0;i<lines.length;i++){
+    const l = lines[i];
+    let m = l.match(/^(me|opp|them|mine)\b[:\s]+(.*)$/i);
+    if(m){
+      const nm = m[2].replace(/(-?\d+(\.\d+)?)\s*$/,"").trim();
+      if(/^(opp|them)/i.test(m[1])) opName = nm || opName; else meName = nm || meName;
+      continue;
+    }
+    if(/^STARTERS TOTAL/i.test(l)){
+      const nums = [];
+      for(let j=i+1;j<lines.length && j<=i+4 && nums.length<2;j++){
+        if(/^STARTERS TOTAL/i.test(lines[j])) break;
+        if(isNum(lines[j])) nums.push(parseFloat(lines[j]));
+      }
+      totals.push(nums); continue;
+    }
+    m = l.match(/^([A-Z][A-Z\-\/]*)\s*\|\s*([A-Za-z]{2,4})\b/);
+    if(!m || i===0) continue;
+    const name = lines[i-1];
+    if(isNum(name) || name.indexOf("|")>=0) continue;
+    const raw = m[1].toUpperCase();
+    const pos = raw==="DST" ? "DEF" : (["QB","RB","WR","TE","K","DEF"].indexOf(raw)>=0 ? raw : "FLEX");
+    const vals = [];
+    for(let j=i+1;j<lines.length && j<=i+6 && vals.length<2;j++){
+      const x = lines[j];
+      if(x.indexOf("|")>=0 || /^STARTERS TOTAL/i.test(x)) break;
+      if(x==="-" || x==="—") vals.push(0); else if(isNum(x)) vals.push(parseFloat(x));
+    }
+    let cur = blocks[blocks.length-1];
+    if(cur.some(p=>p.pos==="DEF")){ cur = []; blocks.push(cur); }
+    cur.push({name, team:norm(m[2]), pos, pts: vals.length>1 ? vals[0] : 0, proj: vals.length>1 ? vals[1] : (vals[0] || POSPROJ[pos] || 10)});
+  }
+  let A = blocks[0] || [], Bb = blocks[1] || [];
+  if(blocks.length===1 && A.length>=12){ const h = Math.ceil(A.length/2); Bb = A.slice(h); A = A.slice(0,h); }
+  const sum = arr => arr.reduce((t,p)=>t+num(p.pts),0);
+  let first = {players:A, score:(totals[0]&&totals[0].length) ? totals[0][0] : sum(A)};
+  let second = {players:Bb, score:(totals[1]&&totals[1].length) ? totals[1][0] : sum(Bb)};
+  if(swap){ const t = first; first = second; second = t; }
+  out.me.players = first.players; out.me.score = first.score;
+  out.op.players = second.players; out.op.score = second.score;
+  if(meName) out.me.name = meName;
+  if(opName) out.op.name = opName;
+}
+
+/* raw Yahoo matchup copy: my player | proj | pts | POS | pts | proj | their player, row by row */
+function looksRawYahoo(txt){ return /^\s*[A-Za-z]{2,3} - (QB|RB|WR|TE|K|DEF)\s*$/m.test(txt); }
+function parseRawYahoo(txt, out){
+  const lines = txt.split(/\n/).map(l=>l.trim()).filter(Boolean);
+  const isN = l => l==="–" || l==="-" || /^-?\d+(\.\d+)?$/.test(l);
+  const val = l => (l==="–" || l==="-") ? 0 : parseFloat(l);
+  const SLOT = /^(QB|RB|WR|TE|K|DEF|W\/R\/T|W\/R|Q\/W\/R\/T|FLEX|SUPERFLEX|BN|D|DST)$/;
+  let pendingOpp = null, lastMe = null;
+  for(let i=0;i<lines.length;i++){
+    const nx = lines[i+1] || "";
+    const tm = nx.match(/^([A-Za-z]{2,3}) - (QB|RB|WR|TE|K|DEF)$/);
+    if(tm && !SLOT.test(lines[i])){
+      let name = lines[i].replace(/(No new player Notes|New Player Notes?|Player Notes?|Video Forecast)/g,"").trim();
+      name = name.replace(/([a-z.])(Q|O|D|IR|PUP|SUSP|NA)$/,"$1").trim();
+      const pos = tm[2]==="DEF" ? "DEF" : tm[2];
+      const pl = {name, team:norm(tm[1]), pos, proj:POSPROJ[pos]||10, pts:0};
+      if(pendingOpp){ pl.pts = pendingOpp.pts; pl.proj = pendingOpp.proj || pl.proj; out.op.players.push(pl); pendingOpp = null; }
+      else { out.me.players.push(pl); lastMe = pl; }
+      i++; continue;
+    }
+    if(SLOT.test(lines[i]) && i>=2 && isN(lines[i-1]) && isN(lines[i-2]) && isN(lines[i+1]||"") && isN(lines[i+2]||"")){
+      if(lastMe){ lastMe.proj = val(lines[i-2]) || lastMe.proj; lastMe.pts = val(lines[i-1]); lastMe = null; }
+      pendingOpp = {pts: val(lines[i+1]), proj: val(lines[i+2])};
+      i += 2;
+    }
+  }
+  const sum = a => a.reduce((t,p)=>t+num(p.pts),0);
+  out.me.score = sum(out.me.players); out.op.score = sum(out.op.players);
+}
+
+/* scoring presets used to turn live ESPN box scores into fantasy points */
+const SCORING = {
+  cbs:  {py:"t20", ptd:6, int:-2, ry:"t10", rtd:6, rec:1,   fum:-2},
+  ppr:  {py:0.04,  ptd:4, int:-1, ry:0.1,   rtd:6, rec:1,   fum:-2},
+  half: {py:0.04,  ptd:4, int:-1, ry:0.1,   rtd:6, rec:0.5, fum:-2},
+  std:  {py:0.04,  ptd:4, int:-1, ry:0.1,   rtd:6, rec:0,   fum:-2}
+};
+const scoringOf = L => L.scoring || (L.platform==="cbs" ? "cbs" : "ppr");
+function bxv(rec, key, idx){
+  const raw = rec ? rec[key] : null;
+  if(raw==null) return 0;
+  let s = String(raw);
+  if(idx!=null) s = s.split("/")[idx] || "0";
+  const n = parseFloat(s.replace(/[^0-9.\-]/g,""));
+  return isFinite(n) ? n : 0;
+}
+function fantasyPts(rec, key){
+  const c = SCORING[key] || SCORING.ppr;
+  const yd = (v, rate) => rate==="t20" ? Math.trunc(v/20) : (rate==="t10" ? Math.trunc(v/10) : v*rate);
+  const pts =
+    yd(bxv(rec,"passing:passingYards"), c.py) + bxv(rec,"passing:passingTouchdowns")*c.ptd + bxv(rec,"passing:interceptions")*c.int +
+    yd(bxv(rec,"rushing:rushingYards"), c.ry) + yd(bxv(rec,"receiving:receivingYards"), c.ry) +
+    (bxv(rec,"rushing:rushingTouchdowns") + bxv(rec,"receiving:receivingTouchdowns"))*c.rtd +
+    bxv(rec,"receiving:receptions")*c.rec + bxv(rec,"fumbles:fumblesLost")*c.fum +
+    bxv(rec,"kicking:totalKickingPoints");
+  return Math.round(pts*100)/100;
+}
+function boxLine(rec){
+  const v = (k,i) => bxv(rec,k,i), has = k => rec[k]!=null, parts = [];
+  if(has("passing:passingYards")){
+    parts.push(v("passing:completions/passingAttempts",0)+"/"+v("passing:completions/passingAttempts",1)+" "+v("passing:passingYards")+" P-YDS");
+    if(v("passing:passingTouchdowns")) parts.push(v("passing:passingTouchdowns")+" P-TD");
+    if(v("passing:interceptions")) parts.push(v("passing:interceptions")+" INT");
+  }
+  if(has("rushing:rushingYards")){
+    parts.push(v("rushing:rushingAttempts")+"-"+v("rushing:rushingYards")+" RUSH");
+    if(v("rushing:rushingTouchdowns")) parts.push(v("rushing:rushingTouchdowns")+" R-TD");
+  }
+  if(has("receiving:receptions")){
+    parts.push(v("receiving:receptions")+" REC "+v("receiving:receivingYards")+" YDS");
+    if(v("receiving:receivingTouchdowns")) parts.push(v("receiving:receivingTouchdowns")+" TD");
+  }
+  if(has("kicking:totalKickingPoints")){
+    parts.push(v("kicking:fieldGoalsMade/fieldGoalAttempts",0)+"/"+v("kicking:fieldGoalsMade/fieldGoalAttempts",1)+" FG · "+v("kicking:extraPointsMade/extraPointAttempts",0)+" XP");
+  }
+  if(v("fumbles:fumblesLost")) parts.push(v("fumbles:fumblesLost")+" FUM");
+  return parts.join(" · ");
+}
+function findBox(gameId, name, team){
+  const map = S.props[gameId]; if(!map) return null;
+  const want = nameKey(name); if(!want) return null;
+  const tm = norm(team);
+  const pool = Object.keys(map).filter(k => !tm || !map[k].team || map[k].team===tm);
+  if(pool.indexOf(want)>=0) return map[want];
+  const wp = want.split(" "), wfirst = wp.length>1 ? wp[0] : "", tail = wp.slice(1).join(" ");
+  let loose = null;
+  for(const k of pool){
+    const kp = k.split(" ");
+    const ok = wp.length>1 ? (k===tail || k.endsWith(" "+tail)) : kp[kp.length-1]===want;
+    if(!ok) continue;
+    if(!wfirst || (kp[0]||"")[0]===wfirst[0]) return map[k];
+    loose = loose || map[k];
+  }
+  return loose;
+}
+/* paste lines only carry projections; points come from the live box score, and a game that
+   hasn't kicked off is always zero, so a stale paste can't show last week's numbers */
+function applyLive(){
+  CFG.leagues.forEach(L=>{
+    if(L.source!=="paste") return;
+    const d = S.lg[L.id]; if(!d || d.err) return;
+    const key = scoringOf(L);
+    [d.me, d.op].forEach(sd=>{
+      let touched = false;
+      (sd.players||[]).forEach(p=>{
+        const g = gameOf(p.team);
+        if(!g) return;
+        if(g.state==="pre"){ p.pts = 0; touched = true; return; }
+        if(p.pos==="DEF"){ touched = true; return; }
+        if(g.state==="post" && num(p.pts)>0){ touched = true; return; }   // the platform's own final number wins
+        const rec = findBox(g.id, p.name, p.team);
+        if(rec){ p.pts = fantasyPts(rec, key); p.boxLine = boxLine(rec); touched = true; }
+      });
+      if(touched && (sd.players||[]).length>=7) sd.score = sd.players.reduce((t,p)=>t+num(p.pts),0);
+    });
+  });
 }
 
 /* ============================ the math ============================ */
@@ -794,15 +1097,21 @@ const PROP_STATS = [
   {id:"defInt",  label:"interceptions (defense)", src:[["interceptions","interceptions"]],       step:0.5, def:0.5}
 ];
 const statDef = id => PROP_STATS.find(x=>x.id===id) || PROP_STATS[0];
-const nameKey = s => String(s||"").toLowerCase().replace(/[^a-z ]/g," ").replace(/\s+/g," ").trim();
+const nameKey = s => String(s||"").toLowerCase().replace(/[^a-z ]/g," ").replace(/\b(jr|sr|ii|iii|iv)\b/g," ").replace(/\s+/g," ").trim();
 
+const BOX_FINAL = Symbol("final");
 /* live box scores, only for games a prop leg is riding on */
 async function loadProps(){
   const need = new Set();
   (CFG.parlays||[]).forEach(t => (t.legs||[]).forEach(l => { if(l.type==="prop" && l.gameId) need.add(l.gameId); }));
-  await Promise.all([...need].slice(0,10).map(async id=>{
+CFG.leagues.forEach(L=>{
+  if(L.source!=="paste") return;
+  const d = S.lg[L.id]; if(!d || d.err) return;
+  [d.me, d.op].forEach(sd=>(sd.players||[]).forEach(p=>{ const g = gameOf(p.team); if(g && g.state!=="pre") need.add(g.id); }));
+});
+  await Promise.all([...need].slice(0,16).map(async id=>{
     const g = S.nfl.games.find(x=>x.id===id);
-    if(g && g.state==="pre") return;
+    if(g && g.state==="pre") return; if(S.props[id] && S.props[id][BOX_FINAL]) return;
     try{
       const j = await jget("https://site.api.espn.com/apis/site/v2/sports/football/nfl/summary?event="+id);
       const map = {};
@@ -812,12 +1121,13 @@ async function loadProps(){
           (grp.athletes||[]).forEach(a=>{
             const disp = a.athlete && a.athlete.displayName; if(!disp) return;
             const k = nameKey(disp);
-            const rec = map[k] || (map[k] = {name:disp});
+            const rec = map[k] || (map[k] = {name:disp, team:norm(tm.team && tm.team.abbreviation)});
             keys.forEach((key,i)=>{ rec[gname+":"+key] = (a.stats||[])[i]; });
           });
         });
       });
-      S.props[id] = map;
+      if(g && g.state==="post") map[BOX_FINAL] = true;
+S.props[id] = map;
     }catch(e){}
   }));
 }
@@ -1074,6 +1384,768 @@ document.getElementById("tickets").addEventListener("click", e => {
   }
 });
 
+/* ============================ fantasy baseball (roto) ============================ */
+/* Everything live comes from MLB's public Stats API (CORS-open): schedule + linescore
+   (current batter, pitcher, count, runners for every game in one call), each game's box
+   score, and play-by-play for live games. The league paste supplies standings, every
+   team's active roster and season totals, so every team's line moves live. */
+const MLBAPI = "https://statsapi.mlb.com/api/v1";
+const MB = {teams:null, abToId:{}, people:null, games:[], box:{}, pbp:{}, err:"", at:0, filter:"all", date:"",
+            roster:null, rosterTxt:null, lg:null, lgTxt:null, own:new Map(), open:null};
+const MLB_ALIAS = {ARI:"AZ", CHW:"CWS", KCR:"KC", TBR:"TB", SFG:"SF", SDP:"SD", WSN:"WSH", WAS:"WSH", OAK:"ATH", ANA:"LAA"};
+const mnorm = t => { const u = String(t||"").toUpperCase(); return MLB_ALIAS[u] || u; };
+const MLB_ABBRS = new Set(["AZ","ATL","BAL","BOS","CHC","CWS","CIN","CLE","COL","DET","HOU","KC","LAA","LAD","MIA","MIL","MIN","NYM","NYY","ATH","PHI","PIT","SD","SF","SEA","STL","TB","TEX","TOR","WSH"].concat(Object.keys(MLB_ALIAS)));
+const POS_TOK = new Set(["C","1B","2B","3B","SS","OF","LF","CF","RF","DH","U","UT","UTIL","CI","MI","SP","RP","P","IF","TWP"]);
+const pKey = s => String(s||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().replace(/[^a-z ]/g," ").replace(/\b(jr|sr|ii|iii|iv)\b/g," ").replace(/\s+/g," ").trim();
+const tKey = s => String(s||"").toLowerCase().replace(/[^a-z0-9]/g,"");
+/* the MLB "day" rolls over at 6am Eastern so late West Coast games stay on the board */
+const etDate = () => { try{ return new Intl.DateTimeFormat("en-CA",{timeZone:"America/New_York",year:"numeric",month:"2-digit",day:"2-digit"}).format(new Date(Date.now()-6*3600e3)); }catch(e){ return new Date().toISOString().slice(0,10); } };
+const ipTxt = outs => Math.floor(outs/3)+"."+(outs%3);
+const ipToOuts = ip => { const p = String(ip||"0").split("."); return (parseInt(p[0],10)||0)*3 + (parseInt(p[1],10)||0); };
+const f3 = v => isFinite(v) ? v.toFixed(3).replace(/^0/,"") : "—";
+const VIEW_KEY = "sundayCommandMlbView";
+
+/* ---------- league paste: CBS standings + every team's actives and totals ---------- */
+const CAT_ALIAS = {SO:"K", KS:"K", S:"SV", SAVES:"SV", HRS:"HR", SBS:"SB", RUNS:"R", WINS:"W", BA:"AVG"};
+const KNOWN_CATS = new Set(["HR","R","RBI","SB","OBP","AVG","SLG","OPS","H","TB","BB","W","SV","K","ERA","WHIP","QS","HLD","SVH","IP","AB","L","K9"]);
+const LOWER_BETTER = new Set(["ERA","WHIP","L"]);
+function parseLeaguePaste(txt){
+  const lines = String(txt||"").split(/\r?\n/);
+  const cells = [];
+  lines.forEach((l,li)=>{ const t = l.trim(); if(t) cells.push({t, li}); });
+  const out = {cats:[], teams:[]};
+  let i = cells.findIndex(c=>/^rank$/i.test(c.t));
+  if(i<0) return out;
+  i++;
+  const hdr = [];
+  while(i<cells.length && !/^\d+(st|nd|rd|th|t)?\.?$/i.test(cells[i].t)) hdr.push(cells[i++].t);
+  const cols = hdr.filter(h=>!/^(team|name)$/i.test(h)).map(h=>{ const u = h.toUpperCase().replace(/[^A-Z0-9]/g,""); return CAT_ALIAS[u]||u; });
+  out.cats = cols.filter(c=>KNOWN_CATS.has(c));
+  while(i<cells.length && /^\d+(st|nd|rd|th|t)?\.?$/i.test(cells[i].t) && cells[i+1] && !/^-?[\d.]+$/.test(cells[i+1].t)){
+    const name = cells[i+1].t, st = {};
+    cols.forEach((c,k)=>{ const v = parseFloat((cells[i+2+k]||{}).t); if(KNOWN_CATS.has(c)) st[c] = v; });
+    out.teams.push({name, st, tot:null, roster:[]});
+    i += 2 + cols.length;
+  }
+  const L0 = i<cells.length ? cells[i].li : lines.length;
+  const POSRE = /^([A-Z]\.\s?[A-Za-z'\.\- ]+?)\s+(C|1B|2B|3B|SS|MI|CI|OF|U|UT|DH|P|SP|RP)\s*\*?\s*$/;
+  const blocks = [];
+  let cur = null, inTot = false;
+  const nextLine = li => { for(let j=li+1;j<lines.length;j++){ const t = lines[j].trim(); if(t) return t; } return ""; };
+  for(let li=L0; li<lines.length; li++){
+    const raw = lines[li], t = raw.trim();
+    if(!t) continue;
+    if(/^(actives|games|stats|today)$/i.test(t)){ inTot = false; continue; }
+    if(/^total$/i.test(t)){ inTot = true; continue; }
+    const m = t.match(POSRE);
+    if(m){
+      if(!cur || cur.closed || inTot){ cur = {name:"", tot:null, roster:[]}; blocks.push(cur); }
+      inTot = false;
+      const g = nextLine(li).match(/^([A-Z]{2,3})\s+\d+\s+(v|@)\s/);
+      cur.roster.push({name:m[1].trim(), pos:m[2], isP:/P/.test(m[2]), team: g ? mnorm(g[1]) : ""});
+      continue;
+    }
+    if(inTot && cur){
+      if(/^\d+-\d+,/.test(t)){
+        const g = (re) => { const x = t.match(re); return x ? parseFloat(x[1]) : 0; };
+        const hab = t.match(/^(\d+)-(\d+)/);
+        cur.tot = cur.tot || {};
+        Object.assign(cur.tot, {h:+hab[1], ab:+hab[2], bb:g(/(\d+) BB\b/), hr:g(/(\d+) HR\b/), rbi:g(/(\d+) RBI\b/)});
+        continue;
+      }
+      if(/\bINN\b/.test(t)){
+        const g = (re) => { const x = t.match(re); return x ? parseFloat(x[1]) : 0; };
+        const ip = t.match(/([\d.]+) INN/);
+        cur.tot = cur.tot || {};
+        Object.assign(cur.tot, {outs: ipToOuts(ip ? ip[1] : "0"), ha:g(/(\d+) HA\b/), bbi:g(/(\d+) BBI\b/), er:g(/(\d+) ER\b/)});
+        cur.closed = true; inTot = false;
+        continue;
+      }
+    }
+    if(!/^\t/.test(raw) && /[a-z]/i.test(t) && !/^[\d.]/.test(t) && !/,/.test(t)){
+      cur = {name:t, tot:null, roster:[]}; blocks.push(cur); inTot = false;
+    }
+  }
+  /* pair each roster block with its standings row: totals first, then the name, then whatever is left */
+  const used = new Set();
+  const assign = (b, T) => { used.add(T); T.roster = b.roster; T.tot = b.tot; b.done = true; };
+  blocks.forEach(b=>{
+    if(!b.roster.length || !b.tot || b.tot.rbi==null) return;
+    const T = out.teams.find(x=>!used.has(x) && x.st.HR===b.tot.hr && x.st.RBI===b.tot.rbi);
+    if(T) assign(b, T);
+  });
+  blocks.forEach(b=>{
+    if(b.done || !b.roster.length || !b.name) return;
+    const k = tKey(b.name);
+    const T = out.teams.find(x=>!used.has(x) && (k.indexOf(tKey(x.name))>=0 || tKey(x.name).indexOf(k)>=0 || k.slice(0,4)===tKey(x.name).slice(0,4)));
+    if(T) assign(b, T);
+  });
+  const leftB = blocks.filter(b=>!b.done && b.roster.length), leftT = out.teams.filter(x=>!used.has(x));
+  if(leftB.length===1 && leftT.length===1) assign(leftB[0], leftT[0]);
+  /* season denominators so OBP / ERA / WHIP can move live */
+  out.teams.forEach(T=>{
+    const s = T.st, t = T.tot || {};
+    if(t.ab){
+      const obp = s.OBP || 0.32;
+      const x = Math.max(0, (obp*(t.ab+t.bb) - t.h - t.bb)/(1-obp));
+      T.pa = t.ab + t.bb + x; T.ob = t.h + t.bb + x;
+    } else { T.pa = 6200; T.ob = (s.OBP||0.32)*6200; T.est = true; }
+    if(t.outs){ T.outs = t.outs; T.er = t.er!=null ? t.er : (s.ERA||4)*t.outs/27; T.runs = (t.ha||0)+(t.bbi||0); }
+    else { T.outs = 3450; T.er = (s.ERA||4)*3450/27; T.runs = (s.WHIP||1.25)*1150; T.est = true; }
+  });
+  return out;
+}
+
+function matchPerson(name, team, isP){
+  const k = pKey(name); if(!k || !MB.people) return null;
+  const tid = team ? MB.abToId[mnorm(team)] : null;
+  const pick = arr => {
+    if(!arr.length) return null;
+    if(tid){ const a = arr.filter(p=>p.teamId===tid); if(a.length) arr = a; }
+    if(isP!=null){ const a = arr.filter(p=>isP ? (p.pos==="P"||p.pos==="TWP") : p.pos!=="P"); if(a.length) arr = a; }
+    const al = arr.filter(p=>MB.teams && MB.teams[p.teamId] && MB.teams[p.teamId].lg===103);
+    return (al[0] || arr[0]);
+  };
+  let c = MB.people.filter(p=>p.key===k);
+  if(c.length) return pick(c);
+  const parts = k.split(" ");
+  if(parts.length>1 && parts[0].length===1){
+    const tail = parts.slice(1).join(" ");
+    c = MB.people.filter(p=>p.key[0]===parts[0] && p.key.endsWith(" "+tail));
+  } else if(parts.length===1){
+    c = MB.people.filter(p=>p.key.split(" ").pop()===k);
+  } else {
+    const tail = parts.slice(1).join(" ");
+    c = MB.people.filter(p=>p.key.endsWith(" "+tail) && p.key.slice(0,2)===parts[0].slice(0,2));
+  }
+  return pick(c);
+}
+async function mlbRefs(){
+  if(!MB.teams){
+    const j = await jget(MLBAPI+"/teams?sportId=1&fields=teams,id,abbreviation,teamName,name,league");
+    const t = {}, a = {};
+    (j.teams||[]).forEach(x=>{ t[x.id] = {ab:x.abbreviation, name:x.teamName||x.name, lg:x.league && x.league.id}; a[x.abbreviation] = x.id; });
+    MB.teams = t; MB.abToId = a;
+  }
+  if(!MB.people){
+    const yr = etDate().slice(0,4);
+    const j = await jget(MLBAPI+"/sports/1/players?season="+yr+"&fields=people,id,fullName,currentTeam,primaryPosition,abbreviation");
+    MB.people = (j.people||[]).map(p=>({id:p.id, name:p.fullName, key:pKey(p.fullName), teamId:p.currentTeam && p.currentTeam.id, pos:(p.primaryPosition && p.primaryPosition.abbreviation)||""}));
+  }
+}
+/* the parsed league with every rostered player matched to an MLB id, and id -> fantasy team */
+function league(){
+  const txt = (CFG.mlb||{}).leaguePaste || "";
+  if(!txt.trim()) return null;
+  if(MB.lg && MB.lgTxt===txt) return MB.lg;
+  const L = parseLeaguePaste(txt);
+  if(!L.teams.length) return null;
+  const own = new Map();
+  L.teams.forEach(T=>T.roster.forEach(r=>{ r.p = matchPerson(r.name, r.team, r.isP); if(r.p) own.set(r.p.id, T); }));
+  if(MB.people){ MB.lg = L; MB.lgTxt = txt; MB.own = own; }
+  return L;
+}
+function viewNames(){ return String((CFG.mlb||{}).views || "Dennis, WTFC").split(/\s*,\s*/).filter(Boolean); }
+function curView(){
+  const v = store.get(VIEW_KEY), names = viewNames();
+  return (v && names.indexOf(v)>=0) ? v : (names[0] || (CFG.mlb||{}).team || "Dennis");
+}
+function findTeam(L, name){
+  const k = tKey(name);
+  return L.teams.find(t=>tKey(t.name)===k) || L.teams.find(t=>k && tKey(t.name).indexOf(k)>=0) || null;
+}
+function parseMlbRoster(txt){
+  const out = []; let bench = false;
+  String(txt||"").split(/\n/).forEach(raw=>{
+    let l = raw.trim().replace(/^\[(.+?)\]\([^)]*\)/,"$1").trim();
+    if(!l || l[0]==="#") return;
+    const low = l.toLowerCase().replace(/[:\-–—]+$/,"").trim();
+    if(/^(bench|reserve|reserves|il|injured|injured list|minors|minor leaguers|na|dl|taxi)$/.test(low)){ bench = true; return; }
+    if(/^(active|actives|starters|lineup|hitters|batters|pitchers|active roster|starting lineup)$/.test(low)){ bench = false; return; }
+    if(/\s(vs\.?|v|@)\s|\d:\d\d|^(pos|player|name|team)\b/i.test(l)) return;
+    let team = "", left = l;
+    if(l.indexOf("|")>=0){
+      const parts = l.split("|"); left = parts[0].trim();
+      const rt = ((parts[1]||"").trim().split(/\s+/)[0]||"").toUpperCase();
+      if(MLB_ABBRS.has(rt)) team = mnorm(rt);
+      const leftTok = left.split(/[\s,\/]+/).filter(Boolean);
+      if(leftTok.length && leftTok.every(x=>POS_TOK.has(x.toUpperCase()))){
+        const prev = out[out.length-1];
+        if(prev && !prev.team && team) prev.team = team;
+        return;
+      }
+    }
+    let toks = left.split(/\s+/).filter(Boolean);
+    let changed = true;
+    while(changed && toks.length>1){
+      changed = false;
+      const last = toks[toks.length-1].replace(/[,()*]/g,""), U = last.toUpperCase();
+      if(!team && MLB_ABBRS.has(U)){ team = mnorm(U); toks.pop(); changed = true; continue; }
+      if(U && U.split(/[,\/]/).every(x=>POS_TOK.has(x))){ toks.pop(); changed = true; continue; }
+      if(!U || /^[\d.$\-]+$/.test(last)){ toks.pop(); changed = true; }
+    }
+    while(toks.length>1 && toks[0].toUpperCase().split(/[,\/]/).every(x=>POS_TOK.has(x))) toks.shift();
+    const name = toks.join(" ").replace(/[,*]+$/,"").trim();
+    if(!/[a-z]{2}/i.test(name) || /^[A-Z]{1,4}$/.test(name)) return;
+    out.push({name, team, bench});
+  });
+  return out;
+}
+/* the roster the lower cards follow: the switched-to team when the league paste is in */
+function mlbRoster(){
+  const L = league();
+  if(L){
+    const T = findTeam(L, curView());
+    return T ? T.roster.map(r=>({name:r.name, team:r.team, bench:false, p:r.p})) : [];
+  }
+  const txt = (CFG.mlb||{}).roster || "";
+  if(MB.roster && MB.rosterTxt===txt) return MB.roster;
+  const list = parseMlbRoster(txt).map(e=>Object.assign({}, e, {p: matchPerson(e.name, e.team)}));
+  if(MB.people){ MB.roster = list; MB.rosterTxt = txt; }
+  return list;
+}
+const isPitcher = p => p && (p.pos==="P" || p.pos==="TWP");
+const isAL = id => MB.teams && MB.teams[id] && MB.teams[id].lg===103;
+const gameAL = g => isAL(g.teams.away.team.id) || isAL(g.teams.home.team.id);
+
+let mlbTicking = false;
+async function mlbTick(){
+  const M = CFG.mlb || {};
+  if(M.on===false || (!String(M.roster||"").trim() && !String(M.standings||"").trim() && !String(M.leaguePaste||"").trim())){ renderDiamond(); return; }
+  if(mlbTicking) return; mlbTicking = true;
+  try{
+    await mlbRefs();
+    const L = league();
+    const date = etDate();
+    if(MB.date!==date){ MB.date = date; MB.box = {}; MB.pbp = {}; }
+    const s = await jget(MLBAPI+"/schedule?sportId=1&date="+date+"&hydrate=linescore,probablePitcher,decisions");
+    MB.games = ((s.dates||[])[0]||{}).games || [];
+    const mine = new Set();
+    if(L) MB.own.forEach((T,id)=>{ const p = MB.people.find(x=>x.id===id); if(p) mine.add(p.teamId); });
+    mlbRoster().forEach(r=>{ if(r.p) mine.add(r.p.teamId); });
+    await Promise.all(MB.games.filter(g=>gameAL(g) || mine.has(g.teams.away.team.id) || mine.has(g.teams.home.team.id)).map(async g=>{
+      const st = g.status.abstractGameState;
+      if(st==="Preview") return;
+      const pk = g.gamePk;
+      if(st==="Final" && MB.box[pk] && MB.box[pk].__final && MB.pbp[pk]) return;
+      try{
+        const [bx, pb] = await Promise.all([jget(MLBAPI+"/game/"+pk+"/boxscore"), jget(MLBAPI+"/game/"+pk+"/playByPlay")]);
+        if(st==="Final") bx.__final = true;
+        MB.box[pk] = bx; MB.pbp[pk] = pb;
+      }catch(e){}
+    }));
+    MB.err = ""; MB.at = Date.now();
+  }catch(e){ MB.err = "MLB feed unreachable — retrying"; }
+  mlbTicking = false;
+  renderDiamond();
+}
+
+function playerDay(p){
+  const tid = p.teamId;
+  const games = MB.games.filter(g=>g.teams.away.team.id===tid || g.teams.home.team.id===tid);
+  const d = {games, bat:{ab:0,h:0,hr:0,r:0,rbi:0,sb:0,bb:0,hbp:0,sf:0,so:0,d2:0,d3:0,cs:0}, pit:{outs:0,h:0,er:0,bb:0,k:0,w:0,sv:0,hr:0,l:0},
+             batted:false, pitched:false, inLineup:null, lineupPosted:false, probable:false};
+  games.forEach(g=>{
+    const side = g.teams.home.team.id===tid ? "home" : "away";
+    const pp = g.teams[side].probablePitcher;
+    if(pp && pp.id===p.id) d.probable = true;
+    const bx = MB.box[g.gamePk]; if(!bx || !bx.teams) return;
+    const T = bx.teams[side]; if(!T) return;
+    if((T.battingOrder||[]).length) d.lineupPosted = true;
+    const pl = T.players && T.players["ID"+p.id]; if(!pl) return;
+    if(pl.battingOrder) d.inLineup = true;
+    const b = (pl.stats||{}).batting || {}, pi = (pl.stats||{}).pitching || {};
+    if(b.plateAppearances || b.atBats || b.baseOnBalls || b.runs || b.stolenBases || b.hitByPitch){
+      d.batted = true;
+      const x = d.bat;
+      x.ab += b.atBats||0; x.h += b.hits||0; x.hr += b.homeRuns||0; x.r += b.runs||0; x.rbi += b.rbi||0;
+      x.sb += b.stolenBases||0; x.cs += b.caughtStealing||0; x.bb += b.baseOnBalls||0; x.hbp += b.hitByPitch||0;
+      x.sf += b.sacFlies||0; x.so += b.strikeOuts||0; x.d2 += b.doubles||0; x.d3 += b.triples||0;
+    }
+    if(pi.battersFaced || pi.outs || pi.pitchesThrown || pi.numberOfPitches){
+      d.pitched = true;
+      const y = d.pit;
+      y.outs += pi.outs!=null ? pi.outs : ipToOuts(pi.inningsPitched);
+      y.h += pi.hits||0; y.er += pi.earnedRuns||0; y.bb += pi.baseOnBalls||0; y.k += pi.strikeOuts||0;
+      y.w += pi.wins||0; y.l += pi.losses||0; y.sv += pi.saves||0; y.hr += pi.homeRuns||0;
+    }
+  });
+  if(d.lineupPosted && d.inLineup===null) d.inLineup = false;
+  return d;
+}
+function sumDays(days){
+  const t = {bat:{ab:0,h:0,hr:0,r:0,rbi:0,sb:0,bb:0,hbp:0,sf:0,so:0,d2:0,d3:0,cs:0}, pit:{outs:0,h:0,er:0,bb:0,k:0,w:0,sv:0,hr:0,l:0}};
+  days.forEach(d=>{ if(!d) return; Object.keys(t.bat).forEach(k=>t.bat[k]+=d.bat[k]); Object.keys(t.pit).forEach(k=>t.pit[k]+=d.pit[k]); });
+  return t;
+}
+function gameState(g, tid){
+  const home = g.teams.home.team.id===tid;
+  const me = home ? g.teams.home : g.teams.away, op = home ? g.teams.away : g.teams.home;
+  const ab = id => (MB.teams && MB.teams[id] || {}).ab || "";
+  const vs = ab(tid) + (home ? " vs " : " @ ") + ab(op.team.id);
+  const st = g.status.abstractGameState, det = g.status.detailedState || "", ls = g.linescore || {};
+  const sc = (me.score==null ? 0 : me.score) + "-" + (op.score==null ? 0 : op.score);
+  if(st==="Preview") return {state:"pre", txt: vs+" · "+new Date(g.gameDate).toLocaleTimeString([], {hour:"numeric",minute:"2-digit"})+(/scheduled|pre-game/i.test(det) ? "" : " · "+det), t:new Date(g.gameDate).getTime()};
+  if(st==="Live") return {state:"live", txt: vs+" · "+(ls.inningState ? ls.inningState.slice(0,3)+" "+ls.currentInning : det)+" · "+sc, t:0};
+  return {state:"done", txt: vs+" · "+(/final|game over/i.test(det) ? "F" : det)+" "+sc, t:new Date(g.gameDate).getTime()};
+}
+function batLine(x){
+  const bits = [x.h+"-"+x.ab];
+  if(x.hr) bits.push((x.hr>1?x.hr+" ":"")+"HR");
+  if(x.d3) bits.push((x.d3>1?x.d3+" ":"")+"3B");
+  if(x.d2) bits.push((x.d2>1?x.d2+" ":"")+"2B");
+  if(x.r) bits.push((x.r>1?x.r+" ":"")+"R");
+  if(x.rbi) bits.push(x.rbi+" RBI");
+  if(x.sb) bits.push((x.sb>1?x.sb+" ":"")+"SB");
+  if(x.bb) bits.push((x.bb>1?x.bb+" ":"")+"BB");
+  if(x.hbp) bits.push("HBP");
+  return bits.join(" · ");
+}
+function pitLine(y){
+  const bits = [ipTxt(y.outs)+" IP", y.er+" ER", y.k+" K", y.h+" H", y.bb+" BB"];
+  if(y.w) bits.push("W"); if(y.l) bits.push("L"); if(y.sv) bits.push("SV");
+  return bits.join(" · ");
+}
+const countTxt = pl => { const c = pl.count || {}; return (c.balls||0)+"-"+(c.strikes||0)+", "+(c.outs||0)+" out"; };
+
+const GOOD_BAT = /^(single|double|triple|home_run|walk|intent_walk|hit_by_pitch|stolen_base|run)/;
+function feedFor(ids, names){
+  const out = [], seen = new Set();
+  Object.keys(MB.pbp).forEach(pk=>{
+    const pb = MB.pbp[pk];
+    (pb.allPlays||[]).forEach(pl=>{
+      const a = pl.about||{}, res = pl.result||{}, m = pl.matchup||{};
+      const bid = m.batter && m.batter.id, pid = m.pitcher && m.pitcher.id;
+      const inn = (a.isTopInning ? "T" : "B") + (a.inning||"");
+      const t = a.endTime || a.startTime || "";
+      const base = {pk, idx:a.atBatIndex||0, t, inn, cur:!a.isComplete};
+      if(ids.has(bid)){
+        const et = res.eventType||"";
+        let cls = "";
+        if(!a.isComplete) cls = "cur";
+        else if(et==="home_run") cls = "big";
+        else if(GOOD_BAT.test(et) || (res.rbi||0)>0) cls = "good";
+        else if(res.isOut || /strikeout|double_play|out/.test(et)) cls = "bad";
+        out.push(Object.assign({}, base, {sub:0, pid:bid, role:"bat", who:names.get(bid)||m.batter.fullName, vs:"vs "+(m.pitcher?m.pitcher.fullName:""),
+          ev: a.isComplete ? (res.event||"") + ((res.rbi||0)>0 ? " · "+res.rbi+" RBI" : "") : "At bat now · "+countTxt(pl),
+          ds: a.isComplete ? (res.description||"") : "", cls}));
+      }
+      if(ids.has(pid)){
+        const et = res.eventType||"";
+        let cls = "";
+        if(!a.isComplete) cls = "cur";
+        else if(et==="home_run") cls = "bad";
+        else if(/strikeout/.test(et) || res.isOut) cls = "good";
+        else if(/^(single|double|triple|walk|intent_walk|hit_by_pitch)/.test(et)) cls = "bad";
+        out.push(Object.assign({}, base, {sub:1, pid, role:"pit", who:names.get(pid)||m.pitcher.fullName, vs:"to "+(m.batter?m.batter.fullName:""),
+          ev: a.isComplete ? (res.event||"") : "Pitching now · "+countTxt(pl), ds: a.isComplete ? (res.description||"") : "", cls}));
+      }
+      (pl.runners||[]).forEach((rn,ri)=>{
+        const d = rn.details||{}, rid = d.runner && d.runner.id;
+        if(!ids.has(rid)) return;
+        const et = d.eventType||"", mv = rn.movement||{};
+        let ev = "", cls = "";
+        if(/^stolen_base/.test(et)){ ev = "Stolen base" + (mv.end ? " · "+mv.end : ""); cls = "good"; }
+        else if(/^(caught_stealing|pickoff_caught)/.test(et)){ ev = "Caught stealing"; cls = "bad"; }
+        else if(mv.end==="score" && !mv.isOut && rid!==bid){ ev = "Scores a run"; cls = "good"; }
+        if(!ev) return;
+        const key = pk+"|"+(a.atBatIndex||0)+"|"+rid+"|"+ev;
+        if(seen.has(key)) return; seen.add(key);
+        out.push(Object.assign({}, base, {sub:2+ri, pid:rid, role:"bat", who:names.get(rid)||(d.runner.fullName||""), vs:"", ev, ds:"on "+(res.event ? res.event.toLowerCase() : "the play")+(res.description ? " — "+res.description : ""), cls, cur:false}));
+      });
+    });
+  });
+  out.sort((x,y)=> (y.cur-x.cur) || String(y.t).localeCompare(String(x.t)) || (y.idx-x.idx) || (y.sub-x.sub));
+  return out;
+}
+
+/* ---------- standings ---------- */
+const LIVE_ADD = {HR:d=>d.bat.hr, R:d=>d.bat.r, RBI:d=>d.bat.rbi, SB:d=>d.bat.sb, H:d=>d.bat.h, BB:d=>d.bat.bb, K:d=>d.pit.k, W:d=>d.pit.w, SV:d=>d.pit.sv, L:d=>d.pit.l};
+function parseStandings(txt, catsStr){
+  let cols = String(catsStr||"HR OBP R RBI SB ERA WHIP K W SV").toUpperCase().split(/[\s,]+/).filter(Boolean).map(c=>CAT_ALIAS[c]||c);
+  const numTok = t => /^[-+]?(\d+(\.\d*)?|\.\d+)$/.test(String(t).replace(/,/g,""));
+  const rows = [];
+  String(txt||"").split(/\n/).forEach(raw=>{
+    const l = raw.replace(/\t/g," ").trim(); if(!l) return;
+    const toks = l.split(/\s+/);
+    const up = toks.map(t=>{ const u = t.toUpperCase().replace(/[^A-Z0-9]/g,""); return CAT_ALIAS[u] || u; });
+    if(up.filter(u=>KNOWN_CATS.has(u)).length>=3 && toks.filter(numTok).length<3){
+      cols = up.filter(u=>u && ["TEAM","NAME","RK","RANK","MANAGER","OWNER"].indexOf(u)<0);
+      return;
+    }
+    let i = 0;
+    if(numTok(toks[0]) && toks.length>1 && !numTok(toks[1])) i = 1;
+    const nameT = [];
+    while(i<toks.length && !numTok(toks[i])) nameT.push(toks[i++]);
+    const nums = toks.slice(i).filter(numTok).map(t=>parseFloat(t.replace(/,/g,"")));
+    if(!nameT.length || nums.length<3) return;
+    rows.push({name:nameT.join(" "), nums});
+  });
+  const cats = cols.filter(c=>KNOWN_CATS.has(c) && c!=="IP" && c!=="AB");
+  const teams = rows.map(r=>{ const st = {}; cols.forEach((c,ix)=>{ if(r.nums[ix]!=null && st[c]==null) st[c] = r.nums[ix]; }); return {name:r.name, st}; })
+                    .filter(t=>cats.length && cats.every(c=>t.st[c]!=null));
+  return {cats, teams};
+}
+function rotoPts(teams, cats, key){
+  const n = teams.length;
+  teams.forEach(t=>{ t[key+"P"] = {}; t[key+"T"] = 0; });
+  cats.forEach(c=>{
+    const lower = LOWER_BETTER.has(c);
+    teams.forEach(t=>{
+      const v = t[key][c]; let better = 0, equal = 0;
+      teams.forEach(o=>{ const w = o[key][c]; if(Math.abs(w-v)<1e-9) equal++; else if(lower ? w<v : w>v) better++; });
+      const pts = n - better - (equal-1)/2;
+      t[key+"P"][c] = pts; t[key+"T"] += pts;
+    });
+  });
+}
+const catFmt = (c, v) => !isFinite(v) ? "—" : (["OBP","AVG","SLG","OPS"].indexOf(c)>=0) ? f3(v) : (c==="ERA" ? v.toFixed(2) : (c==="WHIP" ? v.toFixed(3) : (Math.round(v*10)/10).toString()));
+const ptsFmt = p => Number.isInteger(p) ? String(p) : p.toFixed(1);
+
+/* every team's line right now: pasted season + today's box scores (ratios through the denominators) */
+function liveLeague(L){
+  L.teams.forEach(T=>{
+    const today = sumDays(T.roster.filter(r=>r.p).map(r=>playerDay(r.p)));
+    const b = today.bat, y = today.pit;
+    T.today = today;
+    T.live = Object.assign({}, T.st);
+    L.cats.forEach(c=>{ if(LIVE_ADD[c]) T.live[c] = T.st[c] + LIVE_ADD[c](today); });
+    const pa = T.pa + b.ab + b.bb + b.hbp + b.sf, ob = T.ob + b.h + b.bb + b.hbp;
+    const outs = T.outs + y.outs;
+    if(L.cats.indexOf("OBP")>=0 && (b.ab||b.bb||b.hbp)) T.live.OBP = ob/pa;
+    if(L.cats.indexOf("ERA")>=0 && y.outs) T.live.ERA = (T.er + y.er)*27/outs;
+    if(L.cats.indexOf("WHIP")>=0 && y.outs) T.live.WHIP = (T.runs + y.h + y.bb)*3/outs;
+  });
+  rotoPts(L.teams, L.cats, "st"); rotoPts(L.teams, L.cats, "live");
+}
+
+/* ---------- what you need from each plate appearance ---------- */
+const RANGE = {HR:3, RBI:8, R:8, SB:3, H:6, OBP:.003, AVG:.003, K:12, ERA:.06, WHIP:.012, W:1, SV:2};
+const HIT_CATS = ["HR","RBI","R","SB","OBP","H","AVG"], PIT_CATS = ["K","ERA","WHIP","W","SV"];
+function contested(L, T, R, cats){
+  return cats.filter(c=>L.cats.indexOf(c)>=0 && RANGE[c]!=null && isFinite(T.live[c]) && Math.abs(T.live[c]-R.live[c]) <= RANGE[c]);
+}
+function gapWords(T, R, c){
+  const lower = LOWER_BETTER.has(c), d = T.live[c]-R.live[c];
+  const ahead = lower ? d<0 : d>0;
+  if(Math.abs(d)<1e-9) return "tied in "+c;
+  return catFmt(c, Math.abs(d)).replace(/^\./,".")+" "+c+" "+(ahead ? "behind you" : "ahead of you");
+}
+const shortNm = n => { const p = String(n||"").split(" "); return p.length>1 ? p[0][0]+". "+p.slice(1).join(" ") : n; };
+function needFor(L, T, bat, pit, runners){
+  let hit = 0, out = 0; const why = [];
+  const bo = bat && MB.own.get(bat.id), po = pit && MB.own.get(pit.id);
+  if(bo){
+    if(bo===T){ hit += 2; why.push(shortNm(bat.fullName)+" is yours"); }
+    else { const cs = contested(L, T, bo, HIT_CATS); if(cs.length){ out += cs.length; why.push(shortNm(bat.fullName)+" is "+bo.name+"'s — "+cs.map(c=>gapWords(T,bo,c)).join(", ")); } }
+  }
+  if(po){
+    if(po===T){ out += 2; why.push(shortNm(pit.fullName)+" is your pitcher"); }
+    else { const cs = contested(L, T, po, PIT_CATS); if(cs.length){ hit += cs.length; why.push("shell "+shortNm(pit.fullName)+" ("+po.name+") — "+cs.map(c=>gapWords(T,po,c)).join(", ")); } }
+  }
+  (runners||[]).forEach(r=>{
+    const ro = MB.own.get(r.id); if(!ro) return;
+    if(ro===T){ hit += 1; why.push(shortNm(r.fullName)+" (yours) on base"); }
+    else if(contested(L, T, ro, ["R"]).length){ out += 1; why.push(shortNm(r.fullName)+" ("+ro.name+") on base — "+gapWords(T,ro,"R")); }
+  });
+  const v = hit>out ? "hit" : (out>hit ? "out" : (hit ? "split" : "none"));
+  return {v, why, hit, out};
+}
+const NEED_TXT = {hit:"NEED A HIT", out:"NEED AN OUT", split:"PULLED BOTH WAYS", none:"NO STAKE"};
+function ownTag(L, T, id){
+  const o = MB.own.get(id); if(!o) return "";
+  const hot = o!==T && (contested(L,T,o,HIT_CATS).length || contested(L,T,o,PIT_CATS).length);
+  return '<span class="own '+(o===T ? "me" : (hot ? "hot" : ""))+'">'+esc(o===T ? "YOU" : o.name)+'</span>';
+}
+
+/* ---------- game board ---------- */
+function pitRow(bx, side, id){
+  const T = bx && bx.teams && bx.teams[side]; if(!T || !id) return null;
+  const pl = T.players["ID"+id]; if(!pl) return null;
+  const s = (pl.stats||{}).pitching || {};
+  return {id, name:pl.person.fullName, line:(s.inningsPitched||"0.0")+" IP · "+(s.hits||0)+" H · "+(s.earnedRuns||0)+" ER · "+(s.baseOnBalls||0)+" BB · "+(s.strikeOuts||0)+" K · "+(s.pitchesThrown||s.numberOfPitches||0)+" P"};
+}
+function gamePitchers(g, L, T){
+  const bx = MB.box[g.gamePk], ab = id => (MB.teams[id]||{}).ab || "";
+  const rows = [];
+  ["away","home"].forEach(side=>{
+    const team = g.teams[side];
+    if(!bx){
+      const pp = team.probablePitcher;
+      rows.push('<div><span class="lbl">'+esc(ab(team.team.id))+'</span>'+(pp ? '<b>'+esc(shortNm(pp.fullName))+'</b>'+ownTag(L,T,pp.id)+' · probable' : "SP TBD")+'</div>');
+      return;
+    }
+    const ids = (bx.teams[side].pitchers||[]);
+    const sp = pitRow(bx, side, ids[0]), now = ids.length>1 ? pitRow(bx, side, ids[ids.length-1]) : null;
+    if(sp) rows.push('<div><span class="lbl">'+esc(ab(team.team.id))+'</span>SP <b>'+esc(shortNm(sp.name))+'</b>'+ownTag(L,T,sp.id)+' '+esc(sp.line)+'</div>');
+    if(now) rows.push('<div><span class="lbl"></span>'+(g.status.abstractGameState==="Live" ? "NOW" : "LAST")+' <b>'+esc(shortNm(now.name))+'</b>'+ownTag(L,T,now.id)+' '+esc(now.line)+'</div>');
+  });
+  return rows.join("");
+}
+function gameCard(g, L, T){
+  const ab = id => (MB.teams[id]||{}).ab || "";
+  const st = g.status.abstractGameState, ls = g.linescore || {};
+  const a = g.teams.away, h = g.teams.home;
+  const top = ls.isTopInning;
+  let status = "", need = null, abHtml = "", cls = "";
+  if(st==="Preview"){ status = new Date(g.gameDate).toLocaleTimeString([], {hour:"numeric",minute:"2-digit"})+(/scheduled|pre-game|warmup/i.test(g.status.detailedState) ? "" : " · "+g.status.detailedState); cls = "pre"; }
+  else if(st==="Final"){ status = g.status.detailedState==="Final" || g.status.detailedState==="Game Over" ? "Final"+(ls.currentInning && ls.currentInning!==9 ? "/"+ls.currentInning : "") : g.status.detailedState; cls = "fin"; }
+  else {
+    const o = ls.offense||{}, d = ls.defense||{};
+    const bases = '<span class="bases"><i class="b2'+(o.second?" on":"")+'"></i><i class="b3'+(o.third?" on":"")+'"></i><i class="b1'+(o.first?" on":"")+'"></i></span>';
+    status = (ls.inningState||"")+" "+(ls.currentInning||"")+" · "+(ls.outs||0)+" out"+bases;
+    const mid = /middle|end/i.test(ls.inningState||"");
+    if(o.batter && d.pitcher){
+      const runners = [o.first,o.second,o.third].filter(Boolean);
+      if(L && T) need = needFor(L, T, o.batter, d.pitcher, runners);
+      abHtml = '<div class="abnow">'+(mid ? '<span class="ct">due up </span>' : "")+'<b>'+esc(shortNm(o.batter.fullName))+'</b>'+(L?ownTag(L,T,o.batter.id):"")+
+        ' <span class="ct">vs</span> '+esc(shortNm(d.pitcher.fullName))+(L?ownTag(L,T,d.pitcher.id):"")+
+        (mid ? "" : ' <span class="ct">· '+(ls.balls||0)+'-'+(ls.strikes||0)+'</span>')+'</div>';
+    }
+    if(need) cls = "n-"+need.v;
+  }
+  const row = (t, cur) => '<div class="tm'+(cur?"":"")+'">'+esc(ab(t.team.id))+'</div><div class="rn">'+(st==="Preview" ? "" : (t.score==null?0:t.score))+'</div>';
+  return '<div class="gcard '+cls+'" data-g="'+g.gamePk+'">'+
+    '<div class="gsc"><div class="tm'+(st==="Live" && top ? '" style="color:var(--bulb)' : "")+'">'+esc(ab(a.team.id))+'</div><div class="rn">'+(st==="Preview"?"":(a.score||0))+'</div>'+
+    '<div class="tm'+(st==="Live" && !top ? '" style="color:var(--bulb)' : "")+'">'+esc(ab(h.team.id))+'</div><div class="rn">'+(st==="Preview"?"":(h.score||0))+'</div></div>'+
+    '<div class="gst"><span>'+status+'</span></div>'+abHtml+
+    (need ? '<div class="needb '+need.v+'">'+NEED_TXT[need.v]+'</div>'+(need.why.length ? '<div class="why">'+need.why.map(esc).join("<br>")+'</div>' : "") : "")+
+    '<div class="gpit">'+gamePitchers(g, L, T)+'</div></div>';
+}
+
+/* ---------- expanded box score ---------- */
+function renderBox(){
+  const veil = document.getElementById("bxveil"), host = document.getElementById("bxpanel");
+  if(!veil) return;
+  const g = MB.games.find(x=>String(x.gamePk)===String(MB.open));
+  if(!g){ veil.hidden = true; return; }
+  veil.hidden = false;
+  const L = league(), T = L ? findTeam(L, curView()) : null;
+  const ab = id => (MB.teams[id]||{}).ab || "";
+  const bx = MB.box[g.gamePk], ls = g.linescore || {};
+  let html = '<div class="bxhead"><div><h2>'+esc(ab(g.teams.away.team.id))+' '+(g.teams.away.score||0)+' · '+esc(ab(g.teams.home.team.id))+' '+(g.teams.home.score||0)+'</h2>'+
+    '<div class="hint">'+esc(g.status.detailedState)+(ls.currentInning && g.status.abstractGameState==="Live" ? " · "+esc(ls.inningState||"")+" "+ls.currentInning+" · "+(ls.outs||0)+" out" : "")+'</div></div><button id="bxClose">Close</button></div>';
+  const card = gameCard(g, L, T);
+  html += '<div style="max-width:420px;margin-bottom:10px;pointer-events:none">'+card+'</div>';
+  if(ls.innings && ls.innings.length){
+    const inn = ls.innings;
+    html += '<div class="tscroll"><table class="bxt lsc"><tr><th></th>'+inn.map(i=>'<th>'+i.num+'</th>').join("")+'<th>R</th><th>H</th><th>E</th></tr>'+
+      ["away","home"].map(s=>'<tr><td>'+esc(ab(g.teams[s].team.id))+'</td>'+inn.map(i=>'<td>'+((i[s]||{}).runs!=null ? i[s].runs : "")+'</td>').join("")+
+        '<td>'+(((ls.teams||{})[s]||{}).runs||0)+'</td><td>'+(((ls.teams||{})[s]||{}).hits||0)+'</td><td>'+(((ls.teams||{})[s]||{}).errors||0)+'</td></tr>').join("")+'</table></div>';
+  }
+  if(!bx){ host.innerHTML = html + '<div class="hint" style="margin-top:10px">Box score shows up at first pitch.</div>'; bindBox(); return; }
+  const rowCls = id => { const o = MB.own.get(id); if(!o || !T) return ""; if(o===T) return "me"; return (contested(L,T,o,HIT_CATS).length||contested(L,T,o,PIT_CATS).length) ? "hot" : ""; };
+  const side = s => {
+    const TM = bx.teams[s];
+    const bat = (TM.batters||[]).map(id=>{
+      const pl = TM.players["ID"+id]; if(!pl) return "";
+      const b = (pl.stats||{}).batting||{};
+      if(!pl.battingOrder) return "";
+      const sub = String(pl.battingOrder).slice(-2)!=="00";
+      return '<tr class="'+rowCls(id)+(sub?" sub":"")+'"><td>'+esc(shortNm(pl.person.fullName))+' <span class="ct" style="color:var(--chalk-dim);font-size:9px">'+esc((pl.position||{}).abbreviation||"")+'</span>'+(L?ownTag(L,T,id):"")+'</td>'+
+        [b.atBats,b.runs,b.hits,b.rbi,b.baseOnBalls,b.strikeOuts,b.homeRuns,b.stolenBases].map(v=>'<td>'+(v||0)+'</td>').join("")+'</tr>';
+    }).join("");
+    const pit = (TM.pitchers||[]).map(id=>{
+      const pl = TM.players["ID"+id]; if(!pl) return "";
+      const p = (pl.stats||{}).pitching||{};
+      return '<tr class="'+rowCls(id)+'"><td>'+esc(shortNm(pl.person.fullName))+(L?ownTag(L,T,id):"")+'</td>'+
+        [p.inningsPitched||"0.0",p.hits,p.runs,p.earnedRuns,p.baseOnBalls,p.strikeOuts,p.homeRuns,p.pitchesThrown||p.numberOfPitches].map(v=>'<td>'+(v||0)+'</td>').join("")+'</tr>';
+    }).join("");
+    return '<div><div class="bxsec">'+esc((MB.teams[g.teams[s].team.id]||{}).name||s)+' batting</div><div class="tscroll"><table class="bxt"><tr><th>Batter</th><th>AB</th><th>R</th><th>H</th><th>RBI</th><th>BB</th><th>K</th><th>HR</th><th>SB</th></tr>'+bat+'</table></div>'+
+      '<div class="bxsec">Pitching</div><div class="tscroll"><table class="bxt"><tr><th>Pitcher</th><th>IP</th><th>H</th><th>R</th><th>ER</th><th>BB</th><th>K</th><th>HR</th><th>P</th></tr>'+pit+'</table></div></div>';
+  };
+  html += '<div class="bxgrid">'+side("away")+side("home")+'</div>';
+  const pb = MB.pbp[g.gamePk];
+  if(pb && (pb.allPlays||[]).length){
+    const plays = pb.allPlays.slice().reverse().slice(0,120).map(pl=>{
+      const a = pl.about||{}, r = pl.result||{}, m = pl.matchup||{};
+      const et = r.eventType||"";
+      const bo = m.batter && MB.own.get(m.batter.id), po = m.pitcher && MB.own.get(m.pitcher.id);
+      let cls = !a.isComplete ? "cur" : "";
+      if(a.isComplete && T){
+        const good = GOOD_BAT.test(et) || (r.rbi||0)>0;
+        if(bo===T) cls = good ? "good" : (r.isOut ? "bad" : "");
+        else if(po===T) cls = good ? "bad" : (r.isOut ? "good" : "");
+        else if(bo && contested(L,T,bo,HIT_CATS).length) cls = good ? "bad" : (r.isOut ? "good" : "");
+        else if(po && contested(L,T,po,PIT_CATS).length) cls = good ? "good" : (r.isOut ? "bad" : "");
+        if(et==="home_run" && cls==="good") cls = "big";
+      }
+      return '<div class="ab '+cls+'"><div class="inn">'+(a.isTopInning?"T":"B")+a.inning+'</div><div>'+
+        '<div class="who">'+esc(m.batter?m.batter.fullName:"")+(L&&m.batter?ownTag(L,T,m.batter.id):"")+'<span class="tag">vs '+esc(m.pitcher?shortNm(m.pitcher.fullName):"")+'</span>'+(L&&m.pitcher?ownTag(L,T,m.pitcher.id):"")+'</div>'+
+        '<div class="ev">'+esc(a.isComplete ? (r.event||"") : "At bat · "+countTxt(pl))+'</div>'+(a.isComplete && r.description ? '<div class="ds">'+esc(r.description)+'</div>' : "")+'</div></div>';
+    }).join("");
+    html += '<div class="bxsec">Every at-bat</div><div class="feed" style="max-height:460px">'+plays+'</div>';
+  }
+  host.innerHTML = html;
+  bindBox();
+}
+function bindBox(){ const b = document.getElementById("bxClose"); if(b) b.onclick = () => { MB.open = null; document.getElementById("bxveil").hidden = true; }; }
+
+function renderDiamond(){
+  const wrap = document.getElementById("diaWrap"), host = document.getElementById("dia"), note = document.getElementById("mlbNote");
+  if(!wrap || !host) return;
+  const M = CFG.mlb || {};
+  if(M.on===false){ wrap.hidden = true; return; }
+  wrap.hidden = false;
+  const L = MB.people ? league() : null;
+  const hasRoster = !!String(M.roster||"").trim() || !!L, hasStand = !!String(M.standings||"").trim() || !!L;
+  if(!hasRoster && !hasStand && !String(M.leaguePaste||"").trim()){
+    note.textContent = "";
+    host.innerHTML = '<div class="card"><div class="hint">Drop the league paste (standings plus every roster) into Leagues &amp; setup and this lights up: live roto standings, every AL game with the at-bat in progress, and what you need from it.</div></div>';
+    return;
+  }
+  const views = viewNames(), view = curView();
+  note.innerHTML = '<span style="display:inline-flex;gap:10px;align-items:center">'+esc(MB.err || (MB.at ? "live · "+new Date(MB.at).toLocaleTimeString([], {hour:"numeric",minute:"2-digit",second:"2-digit"}) : "loading MLB…"))+
+    (L && views.length>1 ? '<span class="viewsw">'+views.map(v=>'<button data-view="'+esc(v)+'" class="'+(v===view?"on":"")+'">'+esc(v)+'</button>').join("")+'</span>' : "")+'</span>';
+  if(!MB.people){ host.innerHTML = '<div class="card"><div class="hint">'+esc(MB.err || "Loading MLB…")+'</div></div>'; return; }
+
+  let T = null;
+  if(L){ liveLeague(L); T = findTeam(L, view); }
+
+  /* ----- game board: every game with an AL team ----- */
+  let boardHtml = "";
+  const ag = MB.games.filter(gameAL);
+  if(ag.length){
+    const ord = g => ({Live:0, Preview:1, Final:2})[g.status.abstractGameState] ?? 1;
+    const list = ag.slice().sort((x,y)=>ord(x)-ord(y) || new Date(x.gameDate)-new Date(y.gameDate));
+    boardHtml = '<div class="gboard" style="grid-column:1/-1">'+list.map(g=>gameCard(g, L, T)).join("")+'</div>';
+  }
+
+  /* ----- standings ----- */
+  const roster = mlbRoster();
+  const days = new Map();
+  roster.forEach(r=>{ if(r.p) days.set(r, playerDay(r.p)); });
+  const active = roster.filter(r=>r.p && !r.bench);
+  const today = sumDays(active.map(r=>days.get(r)));
+  const tb = today.bat, tp = today.pit;
+  const obpDen = tb.ab+tb.bb+tb.hbp+tb.sf;
+
+  let standHtml = "";
+  let P = null, meT = null, liveAll = false;
+  if(L){ P = L; meT = T; liveAll = true; }
+  else if(String(M.standings||"").trim()){
+    P = parseStandings(M.standings, M.cats);
+    if(P.teams.length){
+      const myKey = pKey(M.team || "Dennis");
+      meT = P.teams.find(t=>pKey(t.name)===myKey) || P.teams.find(t=>myKey && pKey(t.name).indexOf(myKey)>=0);
+      P.teams.forEach(t=>{ t.live = Object.assign({}, t.st); });
+      if(meT && M.addLive!==false){ P.cats.forEach(c=>{ if(LIVE_ADD[c]) meT.live[c] = meT.st[c] + LIVE_ADD[c](today); }); }
+      rotoPts(P.teams, P.cats, "st"); rotoPts(P.teams, P.cats, "live");
+    }
+  }
+  if(P && P.teams.length){
+    const sorted = P.teams.slice().sort((a,b)=>b.liveT-a.liveT);
+    const baseRank = P.teams.slice().sort((a,b)=>b.stT-a.stT);
+    const rows = sorted.map((t,i)=>{
+      const was = baseRank.indexOf(t);
+      const mv = was>i ? ' <span class="up">▲'+(was-i)+'</span>' : (was<i ? ' <span class="dn">▼'+(i-was)+'</span>' : "");
+      const cells = P.cats.map(c=>{
+        const d = t.liveP[c]-t.stP[c];
+        const dd = Math.abs(d)>1e-9 ? ' <span class="'+(d>0?"up":"dn")+'">'+(d>0?"+":"")+ptsFmt(d)+'</span>' : "";
+        return '<td>'+catFmt(c, t.live[c])+'<span class="rp">'+ptsFmt(t.liveP[c])+dd+'</span></td>';
+      }).join("");
+      const td = t.liveT - t.stT;
+      return '<tr class="'+(t===meT?"me":"")+'"><td>'+(i+1)+'</td><td>'+esc(t.name)+mv+'</td>'+cells+'<td class="tot">'+ptsFmt(t.liveT)+
+        (Math.abs(td)>1e-9 ? '<span class="rp '+(td>0?"up":"dn")+'">'+(td>0?"+":"")+ptsFmt(td)+'</span>' : "")+'</td></tr>';
+    }).join("");
+    let gaps = "";
+    if(meT){
+      gaps = '<div class="gaps">'+P.cats.map(c=>{
+        const lower = LOWER_BETTER.has(c), v = meT.live[c];
+        let up = null, dn = null;
+        P.teams.forEach(o=>{ if(o===meT) return; const w = o.live[c];
+          const better = lower ? w<v : w>v, worse = lower ? w>v : w<v;
+          if(better && (!up || Math.abs(w-v)<Math.abs(up.live[c]-v))) up = o;
+          if(worse && (!dn || Math.abs(w-v)<Math.abs(dn.live[c]-v))) dn = o; });
+        const ties = P.teams.filter(o=>o!==meT && Math.abs(o.live[c]-v)<1e-9);
+        const gapTxt = o => catFmt(c, Math.abs(o.live[c]-v));
+        return '<div class="gapc"><b><span>'+c+'</span><span>'+ptsFmt(meT.liveP[c])+' pts</span></b>'+
+          (up ? '<div class="g-up">'+gapTxt(up)+' to catch '+esc(up.name)+'</div>' : '<div class="g-up">leading the league</div>')+
+          (ties.length ? '<div>tied with '+esc(ties.map(o=>o.name).join(", "))+'</div>' : "")+
+          (dn ? '<div class="g-dn">'+gapTxt(dn)+' clear of '+esc(dn.name)+'</div>' : '<div class="g-dn">last in the category</div>')+
+          '</div>';
+      }).join("")+'</div>';
+    }
+    const sub = liveAll ? ("every team live · "+esc(meT ? meT.name : view)+" highlighted"+(L.teams.some(t=>t.est) ? " · OBP/ERA/WHIP estimated for "+esc(L.teams.filter(t=>t.est).map(t=>t.name).join(", ")) : ""))
+      : (meT ? (M.addLive!==false ? "your live day folded in · rivals as pasted" : "as pasted") : "couldn't find “"+esc(M.team||"Dennis")+"” — set your team name in setup");
+    standHtml = '<div class="card"><div class="ch"><b>'+esc(M.league||"Standings")+'</b><span>'+sub+'</span></div>'+
+      '<div class="tscroll"><table class="roto"><tr><th>#</th><th>Team</th>'+P.cats.map(c=>'<th>'+c+'</th>').join("")+'<th>Pts</th></tr>'+rows+'</table></div>'+gaps+'</div>';
+  }
+
+  /* ----- roster today ----- */
+  let rosterHtml = "";
+  if(roster.length){
+    const cur = {};
+    MB.games.forEach(g=>{ const ls = g.linescore||{}; if(g.status.abstractGameState==="Live" && ls.offense && ls.offense.batter && !/middle|end/i.test(ls.inningState||"")){ cur[ls.offense.batter.id] = "AT BAT"; if(ls.defense && ls.defense.pitcher) cur[ls.defense.pitcher.id] = "PITCHING"; } });
+    const rows = roster.filter(r=>r.p).map(r=>{
+      const d = days.get(r), p = r.p;
+      const g = d.games[0];
+      const gs = g ? gameState(g, p.teamId) : {state:"none", txt:(MB.teams && MB.teams[p.teamId] ? MB.teams[p.teamId].ab : "")+" · no game today", t:9e15};
+      const pitcherish = isPitcher(p) && !(p.pos==="TWP" && d.batted && !d.pitched);
+      let cls = gs.state==="none" ? "idle" : gs.state;
+      let line = "";
+      if(d.pitched) line = pitLine(d.pit);
+      if(d.batted) line = (line ? line+" / " : "") + batLine(d.bat);
+      if(!line){
+        if(gs.state==="pre") line = pitcherish ? (d.probable ? "probable starter" : "") : "";
+        else if(gs.state==="live") line = pitcherish ? "hasn't pitched" : (d.inLineup===false ? "not in lineup" : "0-0");
+        else if(gs.state==="done") line = pitcherish ? "didn't pitch" : "DNP";
+      }
+      if(!pitcherish && d.inLineup===false && gs.state!=="none"){ cls = "out"; if(!d.batted) line = "not in lineup"; }
+      if(gs.state==="done" && !d.batted && !d.pitched) cls = "idle";
+      if(r.bench) cls += " idle";
+      const now = cur[p.id] ? '<span class="now">'+cur[p.id]+'</span>' : "";
+      const order = {live:0, out:1, pre:2, done:3, idle:4, none:5};
+      return {sort:[r.bench?1:0, order[cls.split(" ")[0]]!=null ? order[cls.split(" ")[0]] : 5, gs.t, pitcherish?1:0],
+        html:'<div class="pr '+cls+'"><div><div class="nm">'+esc(p.name)+'<span class="tag">'+esc(p.pos)+'</span>'+(r.bench?'<span class="tag">bench</span>':"")+now+'</div>'+
+             '<div class="sub">'+esc(gs.txt)+(d.probable && gs.state==="pre" ? " · probable SP" : "")+'</div></div>'+
+             '<div class="ln">'+esc(line)+'</div></div>'};
+    }).sort((a,b)=>{ for(let i=0;i<a.sort.length;i++){ if(a.sort[i]!==b.sort[i]) return a.sort[i]-b.sort[i]; } return 0; }).map(x=>x.html).join("");
+    const miss = roster.filter(r=>!r.p).map(r=>r.name);
+    const sum = '<div class="todaysum">Today <b>'+tb.h+'-'+tb.ab+'</b> · <b>'+tb.hr+'</b> HR · <b>'+tb.r+'</b> R · <b>'+tb.rbi+'</b> RBI · <b>'+tb.sb+'</b> SB · OBP <b>'+(obpDen ? f3((tb.h+tb.bb+tb.hbp)/obpDen) : "—")+'</b><br>'+
+      '<b>'+ipTxt(tp.outs)+'</b> IP · <b>'+tp.er+'</b> ER · <b>'+tp.k+'</b> K · <b>'+tp.w+'</b> W · <b>'+tp.sv+'</b> SV · ERA <b>'+(tp.outs ? (tp.er*27/tp.outs).toFixed(2) : "—")+'</b> · WHIP <b>'+(tp.outs ? ((tp.h+tp.bb)*3/tp.outs).toFixed(2) : "—")+'</b></div>';
+    rosterHtml = '<div class="card"><div class="ch"><b>'+esc(L ? view : "My roster")+' today</b><span>'+active.length+' active</span></div>'+sum+
+      '<div class="plist">'+(rows || '<div class="hint">No one on the roster matched yet.</div>')+'</div>'+
+      (miss.length ? '<div class="miss">Couldn\'t match: '+esc(miss.join(", "))+'</div>' : "")+'</div>';
+  }
+
+  /* ----- every plate appearance for the followed roster ----- */
+  let feedHtml = "";
+  if(roster.length){
+    const ids = new Set(), names = new Map();
+    roster.forEach(r=>{ if(r.p && !r.bench){ ids.add(r.p.id); names.set(r.p.id, r.p.name); } });
+    const all = feedFor(ids, names);
+    const f = MB.filter;
+    const list = all.filter(e=> f==="all" || (f==="bat" && e.role==="bat") || (f==="pit" && e.role==="pit")).slice(0,200);
+    const chip = (k,l) => '<button data-ff="'+k+'" class="'+(f===k?"on":"")+'">'+l+'</button>';
+    feedHtml = '<div class="card"><div class="ch"><b>'+esc(L ? view+"'s" : "Every")+' at-bats</b><div class="chips">'+chip("all","All")+chip("bat","Hitters")+chip("pit","Pitchers")+'</div></div>'+
+      '<div class="feed">'+(list.map(e=>{
+        const tm = e.t ? new Date(e.t).toLocaleTimeString([], {hour:"numeric",minute:"2-digit"}) : "";
+        return '<div class="ab '+e.cls+'"><div class="inn">'+esc(e.inn)+'<i>'+esc(e.cur ? "now" : tm)+'</i></div><div>'+
+          '<div class="who">'+esc(e.who)+(e.vs ? '<span class="tag">'+esc(e.vs)+'</span>' : "")+'</div>'+
+          '<div class="ev">'+esc(e.ev)+'</div>'+(e.ds ? '<div class="ds">'+esc(e.ds)+'</div>' : "")+'</div></div>';
+      }).join("") || '<div class="hint">Nothing yet. Plate appearances land here the moment they finish, with the live one on top.</div>')+'</div></div>';
+  }
+
+  const left = standHtml + rosterHtml;
+  host.innerHTML = boardHtml + (left ? '<div>'+left+'</div>' : "") + (feedHtml ? '<div>'+feedHtml+'</div>' : "");
+  if(MB.open) renderBox();
+}
+document.getElementById("dia").addEventListener("click", e=>{
+  const b = e.target.closest("[data-ff]");
+  if(b){ MB.filter = b.dataset.ff; renderDiamond(); return; }
+  const c = e.target.closest("[data-g]");
+  if(c){ MB.open = c.dataset.g; renderBox(); }
+});
+document.getElementById("mlbNote").addEventListener("click", e=>{
+  const v = e.target.closest("[data-view]"); if(!v) return;
+  store.set(VIEW_KEY, v.dataset.view); renderDiamond();
+});
+document.getElementById("bxveil").addEventListener("click", e=>{ if(e.target.id==="bxveil"){ MB.open = null; e.target.hidden = true; } });
+document.addEventListener("keydown", e=>{ if(e.key==="Escape" && MB.open){ MB.open = null; document.getElementById("bxveil").hidden = true; } });
+document.addEventListener("visibilitychange", ()=>{ if(!document.hidden) mlbTick(); });
+
+
 /* ============================ rendering ============================ */
 function render(){
   renderGames(); renderNeeds(); renderTickets();
@@ -1123,7 +2195,7 @@ function renderNeeds(){
     const qbSlots = L.platform==="cbs" ? 2 : 1; // CBS leagues run superflex (QB/QB)
     const rowsFor = players => orderPlayers(players||[], qbSlots).map(p=>{
       const cls = p._state || "pre";
-      const sl = statLine(p.pos, p.raw);
+      const sl = p.boxLine || statLine(p.pos, p.raw);
       const subBits = [matchupText(p)];
       if(sl) subBits.push(sl);
       else if(cls==="live" && p._game) subBits.push(esc(p._game.detail));
@@ -1173,6 +2245,7 @@ async function tick(){
   }));
 
   try{ await loadProps(); }catch(e){}
+try{ applyLive(); }catch(e){}
 
   if(S.nfl.ok) S.lastOk = Date.now();
   const p = document.getElementById("pulse"), st = document.getElementById("stamp");
@@ -1197,6 +2270,16 @@ function drawCfg(){
   drawSyncStatus();
   document.getElementById("wkIn").value = CFG.week || "";
   document.getElementById("proxyIn").value = CFG.proxy || "";
+const MC = CFG.mlb || {};
+document.getElementById("mlbOn").checked = MC.on!==false;
+document.getElementById("mlbLeague").value = MC.league || "";
+document.getElementById("mlbTeam").value = MC.team || "";
+document.getElementById("mlbRoster").value = MC.roster || "";
+document.getElementById("mlbStand").value = MC.standings || "";
+document.getElementById("mlbCats").value = MC.cats || "";
+document.getElementById("mlbAddLive").checked = MC.addLive!==false;
+document.getElementById("mlbPaste").value = MC.leaguePaste || "";
+document.getElementById("mlbViews").value = MC.views || "Dennis, WTFC";
   document.getElementById("lgList").innerHTML = CFG.leagues.map((L,i)=>{
     const sel = (v,cur) => v===cur ? " selected" : "";
     const show = v => L.source===v ? "" : ' style="display:none"';
@@ -1224,7 +2307,7 @@ function drawCfg(){
         'Anything missing falls back to a positional projection. Needs CORS enabled on the host, or route it through the proxy below.</div></div>'+
       '<div class="f-paste"'+show("paste")+'><label>Score line</label>'+
         '<textarea class="c-manual" rows="7" placeholder="me Njigbas love rice 26.2&#10;Rice KC 14.4&#10;McBride ARI 14.3&#10;opp How I Metcalf your mother 27.8&#10;Jeanty LV 17.9&#10;Kelce KC 9.8">'+esc(L.manual||"")+'</textarea>'+
-        '<div class="hint">Start a side with \u201cme\u201d or \u201copp\u201d plus the team name and its current score. Then one line per starter still to play: name, NFL team, projection. Field position and clock come from the live NFL feed either way, so these lines only need a nudge when your totals drift.</div></div>'+
+        '<div class="hint">Start a side with \u201cme\u201d or \u201copp\u201d plus the team name and its current score. Then one line per starter still to play: name, NFL team, projection. Field position and clock come from the live NFL feed either way, so these lines only need a nudge when your totals drift. A straight copy of the CBS matchup page works too — player points then fill in live from the box scores.</div>'+'<div class="grid2"><div><label>Scoring for live points</label><select class="c-scoring">'+[["cbs","CBS whole-point PPR"],["ppr","Full PPR"],["half","Half PPR"],["std","Standard"]].map(o=>'<option value="'+o[0]+'"'+sel(o[0], scoringOf(L))+'>'+o[1]+'</option>').join("")+'</select></div>'+'<div><label style="display:flex;gap:6px;align-items:center;margin-top:24px"><input type="checkbox" class="c-swap" style="width:auto"'+(L.swap?" checked":"")+'> in a raw CBS copy, my team is the second block</label></div></div>'+'</div>'+
     '</div>';
   }).join("");
 }
@@ -1244,11 +2327,24 @@ function readCfg(){
       leagueId: g(".c-eleague") || old.leagueId || "",
       teamId: g(".c-team") || old.teamId || "",
       feed: g(".c-feed") || old.feed || "",
-      manual: c.querySelector(".c-manual") ? c.querySelector(".c-manual").value : (old.manual||"")
+      manual: c.querySelector(".c-manual") ? c.querySelector(".c-manual").value : (old.manual||""),
+scoring: c.querySelector(".c-scoring") ? c.querySelector(".c-scoring").value : (old.scoring||""),
+swap: c.querySelector(".c-swap") ? c.querySelector(".c-swap").checked : !!old.swap
     };
   });
   CFG.week = document.getElementById("wkIn").value.trim();
   CFG.proxy = document.getElementById("proxyIn").value.trim();
+CFG.mlb = {
+  on: document.getElementById("mlbOn").checked,
+  league: document.getElementById("mlbLeague").value.trim(),
+  team: document.getElementById("mlbTeam").value.trim(),
+  roster: document.getElementById("mlbRoster").value,
+  standings: document.getElementById("mlbStand").value,
+  cats: document.getElementById("mlbCats").value.trim(),
+  addLive: document.getElementById("mlbAddLive").checked,
+  leaguePaste: document.getElementById("mlbPaste").value,
+  views: document.getElementById("mlbViews").value.trim() || "Dennis, WTFC"
+};
   saveCfg();
 }
 
@@ -1296,7 +2392,7 @@ window.addEventListener("unhandledrejection", e=>{
 });
 document.getElementById("openCfg").onclick = () => { drawCfg(); veil.hidden = false; };
 document.getElementById("closeCfg").onclick = () => { veil.hidden = true; };
-document.getElementById("saveCfg").onclick = () => { readCfg(); veil.hidden = true; S.lg = {}; render(); tick(); };
+document.getElementById("saveCfg").onclick = () => { readCfg(); veil.hidden = true; S.lg = {}; render(); tick(); mlbTick(); };
 document.getElementById("addLg").onclick = () => {
   readCfg();
   CFG.leagues.push({id:"L"+Date.now(), name:"New league", platform:"cbs", source:"paste", leagueId:"", teamId:"", feed:"", manual:""});
@@ -1326,6 +2422,9 @@ document.getElementById("games").addEventListener("click", e=>{
 render();
 tick();
 setInterval(tick, 15000);
+mlbTick();
+setInterval(mlbTick, 20000);
+document.getElementById("goDia").onclick = () => { const w = document.getElementById("diaWrap"); if(w) window.scrollTo(0, w.getBoundingClientRect().top + window.scrollY - 56); };
 document.addEventListener("visibilitychange", ()=>{ if(!document.hidden) tick(); });
 
 /* cross-device sync: catch up with whatever another device last saved */
